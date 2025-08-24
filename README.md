@@ -10,22 +10,22 @@
 ```sql
 add jar 'hive-udf-extensions-1.0.0.jar';
 
-create temporary function array_contains as 'com.github.aaronshan.functions.array.UDFArrayContains';
-create temporary function array_equals as 'com.github.aaronshan.functions.array.UDFArrayEquals';
-create temporary function array_intersect as 'com.github.aaronshan.functions.array.UDFArrayIntersect';
-create temporary function array_max as 'com.github.aaronshan.functions.array.UDFArrayMax';
-create temporary function array_min as 'com.github.aaronshan.functions.array.UDFArrayMin';
-create temporary function array_join as 'com.github.aaronshan.functions.array.UDFArrayJoin';
-create temporary function array_distinct as 'com.github.aaronshan.functions.array.UDFArrayDistinct';
-create temporary function array_position as 'com.github.aaronshan.functions.array.UDFArrayPosition';
-create temporary function array_remove as 'com.github.aaronshan.functions.array.UDFArrayRemove';
-create temporary function array_reverse as 'com.github.aaronshan.functions.array.UDFArrayReverse';
-create temporary function array_sort as 'com.github.aaronshan.functions.array.UDFArraySort';
-create temporary function array_concat as 'com.github.aaronshan.functions.array.UDFArrayConcat';
-create temporary function array_value_count as 'com.github.aaronshan.functions.array.UDFArrayValueCount';
-create temporary function array_slice as 'com.github.aaronshan.functions.array.UDFArraySlice';
-create temporary function array_element_at as 'com.github.aaronshan.functions.array.UDFArrayElementAt';
-create temporary function array_shuffle as 'com.github.aaronshan.functions.array.UDFArrayShuffle';
+create temporary function array_contains as 'io.datadynamics.hive.udf.array.UDFArrayContains';
+create temporary function array_equals as 'io.datadynamics.hive.udf.array.UDFArrayEquals';
+create temporary function array_intersect as 'io.datadynamics.hive.udf.array.UDFArrayIntersect';
+create temporary function array_max as 'io.datadynamics.hive.udf.array.UDFArrayMax';
+create temporary function array_min as 'io.datadynamics.hive.udf.array.UDFArrayMin';
+create temporary function array_join as 'io.datadynamics.hive.udf.array.UDFArrayJoin';
+create temporary function array_distinct as 'io.datadynamics.hive.udf.array.UDFArrayDistinct';
+create temporary function array_position as 'io.datadynamics.hive.udf.array.UDFArrayPosition';
+create temporary function array_remove as 'io.datadynamics.hive.udf.array.UDFArrayRemove';
+create temporary function array_reverse as 'io.datadynamics.hive.udf.array.UDFArrayReverse';
+create temporary function array_sort as 'io.datadynamics.hive.udf.array.UDFArraySort';
+create temporary function array_concat as 'io.datadynamics.hive.udf.array.UDFArrayConcat';
+create temporary function array_value_count as 'io.datadynamics.hive.udf.array.UDFArrayValueCount';
+create temporary function array_slice as 'io.datadynamics.hive.udf.array.UDFArraySlice';
+create temporary function array_element_at as 'io.datadynamics.hive.udf.array.UDFArrayElementAt';
+create temporary function array_shuffle as 'io.datadynamics.hive.udf.array.UDFArrayShuffle';
 ```
 
 ```sql
