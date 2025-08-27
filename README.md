@@ -56,29 +56,30 @@ select array_shuffle(array(16,12,18,9))
 HDFS에 UDF JAR 파일을 다음과 같이 업로드합니다. 해당 JAR 파일은 `hive` 계정이 접근할 수 있는 권한이 있어야 합니다.
 
 ```
-hdfs dfs -mkdir /udf_jars
-hdfs dfs -chmod 755 /udf_jars
-hdfs dfs -put hive-udf-extensions-1.0.0.jar /udf_jars
-hdfs dfs -chmod 755 /udf_jars/hive-udf-extensions-1.0.0.jar
+hdfs dfs -mkdir hdfs://<NN>/data/raw/system/lib-ext/
+hdfs dfs -chmod 755 hdfs://<NN>/data/raw/system/lib-ext/
+hdfs dfs -put hive-udf-extensions-1.0.0.jar hdfs://<NN>/data/raw/system/lib-ext/
+hdfs dfs -chmod 755 hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar
 ```
 
 ```sql
 USE bdphive;
     
-create function bdphive.array_contains as 'io.datadynamics.hive.udf.array.UDFArrayContains' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_equals as 'io.datadynamics.hive.udf.array.UDFArrayEquals' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_intersect as 'io.datadynamics.hive.udf.array.UDFArrayIntersect' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_max as 'io.datadynamics.hive.udf.array.UDFArrayMax' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_min as 'io.datadynamics.hive.udf.array.UDFArrayMin' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_join as 'io.datadynamics.hive.udf.array.UDFArrayJoin' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_distinct as 'io.datadynamics.hive.udf.array.UDFArrayDistinct' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_position as 'io.datadynamics.hive.udf.array.UDFArrayPosition' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_remove as 'io.datadynamics.hive.udf.array.UDFArrayRemove' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_reverse as 'io.datadynamics.hive.udf.array.UDFArrayReverse' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_sort as 'io.datadynamics.hive.udf.array.UDFArraySort' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_concat as 'io.datadynamics.hive.udf.array.UDFArrayConcat' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_value_count as 'io.datadynamics.hive.udf.array.UDFArrayValueCount' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_slice as 'io.datadynamics.hive.udf.array.UDFArraySlice' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_element_at as 'io.datadynamics.hive.udf.array.UDFArrayElementAt' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_shuffle as 'io.datadynamics.hive.udf.array.UDFArrayShuffle' USING JAR '/udf_jars/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_contains as 'io.datadynamics.hive.udf.array.UDFArrayContains' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_equals as 'io.datadynamics.hive.udf.array.UDFArrayEquals' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_intersect as 'io.datadynamics.hive.udf.array.UDFArrayIntersect' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_max as 'io.datadynamics.hive.udf.array.UDFArrayMax' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_min as 'io.datadynamics.hive.udf.array.UDFArrayMin' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_join as 'io.datadynamics.hive.udf.array.UDFArrayJoin' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_distinct as 'io.datadynamics.hive.udf.array.UDFArrayDistinct' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_position as 'io.datadynamics.hive.udf.array.UDFArrayPosition' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_remove as 'io.datadynamics.hive.udf.array.UDFArrayRemove' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_reverse as 'io.datadynamics.hive.udf.array.UDFArrayReverse' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_sort as 'io.datadynamics.hive.udf.array.UDFArraySort' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_concat as 'io.datadynamics.hive.udf.array.UDFArrayConcat' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_value_count as 'io.datadynamics.hive.udf.array.UDFArrayValueCount' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_slice as 'io.datadynamics.hive.udf.array.UDFArraySlice' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_element_at as 'io.datadynamics.hive.udf.array.UDFArrayElementAt' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_shuffle as 'io.datadynamics.hive.udf.array.UDFArrayShuffle' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_shuffle as 'io.datadynamics.hive.udf.array.UDFSequence' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
 ```
