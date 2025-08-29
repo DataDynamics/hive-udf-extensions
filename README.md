@@ -81,5 +81,25 @@ create function bdphive.array_value_count as 'io.datadynamics.hive.udf.array.UDF
 create function bdphive.array_slice as 'io.datadynamics.hive.udf.array.UDFArraySlice' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
 create function bdphive.array_element_at as 'io.datadynamics.hive.udf.array.UDFArrayElementAt' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
 create function bdphive.array_shuffle as 'io.datadynamics.hive.udf.array.UDFArrayShuffle' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_shuffle as 'io.datadynamics.hive.udf.array.UDFSequence' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdphive.array_sequence as 'io.datadynamics.hive.udf.array.UDFSequence' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+
+create function bdphive.safe_divide as 'io.datadynamics.hive.udf.GenericUDFSafeDivide' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
 ```
+
+## Macro
+
+### Presto Try
+
+```sql
+-- 세이프 정수 변환
+CREATE TEMPORARY MACRO try_int(s STRING)
+(CASE WHEN s RLIKE '^-?[0-9]+$' THEN CAST(s AS INT) ELSE NULL END);
+
+-- 세이프 실수 변환
+CREATE TEMPORARY MACRO try_double(s STRING)
+(CASE WHEN s RLIKE '^-?[0-9]+(\\.[0-9]+)?$' THEN CAST(s AS DOUBLE) ELSE NULL END);
+
+-- 세이프 날짜(YYYY-MM-DD)
+CREATE TEMPORARY MACRO try_date(s STRING)
+(CASE WHEN s RLIKE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN TO_DATE(s) ELSE NULL END);
+``````

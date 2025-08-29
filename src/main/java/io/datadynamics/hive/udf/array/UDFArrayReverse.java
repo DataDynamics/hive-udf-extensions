@@ -14,11 +14,15 @@ import java.util.ArrayList;
         , value = "_FUNC_(array) - reverse the array element."
         , extended = "Example:\n > select _FUNC_(array) from src;")
 public class UDFArrayReverse extends GenericUDF {
+
     private static final int ARG_COUNT = 1; // Number of arguments to this UDF
+
     private transient ListObjectInspector arrayOI;
+
     private transient ObjectInspector arrayElementOI;
 
     private transient ObjectInspectorConverters.Converter converter;
+
     private final transient ArrayList<Object> result = new ArrayList<Object>();
 
     public UDFArrayReverse() {
@@ -28,17 +32,13 @@ public class UDFArrayReverse extends GenericUDF {
     public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
         // Check if two arguments were passed
         if (arguments.length != ARG_COUNT) {
-            throw new UDFArgumentLengthException(
-                    "The function array_reverse(array) takes exactly " + ARG_COUNT + " arguments.");
+            throw new UDFArgumentLengthException("The function array_reverse(array) takes exactly " + ARG_COUNT + " arguments.");
         }
 
         // Check if two argument is of category LIST
         if (!arguments[0].getCategory().equals(ObjectInspector.Category.LIST)) {
             throw new UDFArgumentTypeException(0,
-                    "\"" + org.apache.hadoop.hive.serde.serdeConstants.LIST_TYPE_NAME + "\" "
-                            + "expected at function array_reverse, but "
-                            + "\"" + arguments[0].getTypeName() + "\" "
-                            + "is found");
+                    "\"" + org.apache.hadoop.hive.serde.serdeConstants.LIST_TYPE_NAME + "\" expected at function array_reverse, but \"" + arguments[0].getTypeName() + "\" is found");
         }
 
         arrayOI = (ListObjectInspector) arguments[0];

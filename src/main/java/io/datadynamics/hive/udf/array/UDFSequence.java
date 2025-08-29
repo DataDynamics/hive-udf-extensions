@@ -20,7 +20,9 @@ import static io.datadynamics.hive.udf.utils.Failures.checkCondition;
         , extended = "Example:\n > select _FUNC_(1, 5) from src;\n > select _FUNC_(1, 9, 4) from src;\n" +
         " > select _FUNC_('2016-04-12', '2016-04-14') from src;")
 public class UDFSequence extends UDF {
+
     public final static DateTimeFormatter DEFAULT_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
     private static final long MAX_RESULT_ENTRIES = 10000;
 
     public UDFSequence() {
@@ -59,12 +61,8 @@ public class UDFSequence extends UDF {
     }
 
     private static void checkValidStep(long start, long stop, long step) throws HiveException {
-        checkCondition(
-                step != 0,
-                "step must not be zero");
-        checkCondition(
-                step > 0 ? stop >= start : stop <= start,
-                "sequence stop value should be greater than or equal to start value if step is greater than zero otherwise stop should be less than or equal to start");
+        checkCondition(step != 0, "step must not be zero");
+        checkCondition(step > 0 ? stop >= start : stop <= start, "sequence stop value should be greater than or equal to start value if step is greater than zero otherwise stop should be less than or equal to start");
     }
 
     private static void checkMaxEntry(int length) throws HiveException {
