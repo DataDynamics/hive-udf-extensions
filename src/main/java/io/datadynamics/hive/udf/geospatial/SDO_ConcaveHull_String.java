@@ -13,6 +13,7 @@ public class SDO_ConcaveHull_String extends UDF {
      */
     public String evaluate(String wkt, Double tolerance) {
         Geometry geom = GeometryUtils.stringToGeometry(wkt);
+
         if (geom == null) return null;
 
         ConcaveHull hull = new ConcaveHull(geom);

@@ -11,6 +11,7 @@ import org.locationtech.jts.geom.Geometry;
 public class SDO_Transform extends UDF {
     public BytesWritable evaluate(BytesWritable geomBytes, String sourceCrsCode, String targetCrsCode) {
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
+
         if (geom == null || sourceCrsCode == null || targetCrsCode == null) return null;
 
         try {
@@ -27,7 +28,9 @@ public class SDO_Transform extends UDF {
                 String[] split = targetCrsCode.split(":");
                 int srid = Integer.parseInt(split[1]);
                 transformedGeom.setSRID(srid);
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+                // Ignored
+            }
 
             return GeometryUtils.geometryToBytes(transformedGeom);
         } catch (Exception e) {

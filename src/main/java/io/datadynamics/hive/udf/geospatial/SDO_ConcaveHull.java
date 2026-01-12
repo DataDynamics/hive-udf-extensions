@@ -14,6 +14,7 @@ public class SDO_ConcaveHull extends UDF {
      */
     public BytesWritable evaluate(BytesWritable geomBytes, Double tolerance) {
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
+
         if (geom == null) return null;
 
         ConcaveHull hull = new ConcaveHull(geom);

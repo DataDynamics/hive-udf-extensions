@@ -24,6 +24,7 @@ public class GeometryUtils {
 
     public static Geometry bytesToGeometry(BytesWritable wkb) {
         if (wkb == null || wkb.getLength() == 0) return null;
+
         try {
             // copyBytes()를 사용하여 안전하게 바이트 배열 추출
             return wkbReader.read(wkb.copyBytes());
@@ -35,12 +36,14 @@ public class GeometryUtils {
 
     public static BytesWritable geometryToBytes(Geometry geom) {
         if (geom == null) return null;
+
         byte[] bytes = wkbWriter.write(geom);
         return new BytesWritable(bytes);
     }
 
     public static Geometry stringToGeometry(String wkt) {
         if (wkt == null || wkt.isEmpty()) return null;
+
         try {
             return wktReader.read(wkt);
         } catch (Exception e) {
@@ -51,6 +54,7 @@ public class GeometryUtils {
 
     public static String geometryToString(Geometry geom) {
         if (geom == null) return null;
+
         return wktWriter.write(geom);
     }
 }
