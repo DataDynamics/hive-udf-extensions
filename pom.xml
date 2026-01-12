@@ -39,6 +39,44 @@
         </dependency>
 
         <dependency>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+            <version>1.20.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-referencing</artifactId>
+            <version>33.4</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/gt-referencing-33.4.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-hsql</artifactId>
+            <version>33.4</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/gt-epsg-hsql-33.4.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-main</artifactId>
+            <version>33.4</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/gt-main-33.4.jar</systemPath>
+        </dependency>        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-api</artifactId>
+            <version>33.4</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/gt-api-33.4.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sedona</groupId>
+            <artifactId>sedona-common</artifactId>
+            <version>1.8.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.30</version>
@@ -80,4 +118,11 @@
 -->
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>scijava</id>
+            <url>https://maven.scijava.org/content/repositories/public/</url>
+        </repository>
+    </repositories>
 </project>
