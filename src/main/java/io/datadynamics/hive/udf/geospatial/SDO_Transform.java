@@ -8,7 +8,11 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
 
+/**
+ *  기하학 객체의 좌표계를 변환한다(예: WGS84 -> UTM)
+ */
 public class SDO_Transform extends UDF {
+
     public BytesWritable evaluate(BytesWritable geomBytes, String sourceCrsCode, String targetCrsCode) {
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
 

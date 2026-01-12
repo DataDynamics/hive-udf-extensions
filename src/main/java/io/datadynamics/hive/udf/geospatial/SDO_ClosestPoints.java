@@ -7,6 +7,9 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.operation.distance.DistanceOp;
 
+/**
+ * 두 객체 간의 최단 거리를 형성하는 두 점을 반환한다. SDO_CLOSEST_POINTS_TYPE 객체를 반환하지만, Impala 스칼라 UDF에서는 두 점을 잇는 LINESTRING 또는 MULTIPOINT로 반환하는 것이 적합하다.
+ */
 public class SDO_ClosestPoints extends UDF {
 
     private final GeometryFactory factory = new GeometryFactory();
