@@ -1,0 +1,28 @@
+<assembly>
+    <id>merge-all</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.outputDirectory}</directory>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/classes-lib</directory>
+            <outputDirectory>/</outputDirectory>
+            <excludes>
+                <exclude>META-INF/NOTICE</exclude>
+                <exclude>META-INF/DEPENDENCIES</exclude>
+                <exclude>META-INF/LICENSE</exclude>
+                <exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+                <exclude>META-INF/maven/**/*</exclude>
+                <exclude>META-INF/services/**/*</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+</assembly>
