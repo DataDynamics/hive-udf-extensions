@@ -42,6 +42,8 @@
             <groupId>org.locationtech.jts</groupId>
             <artifactId>jts-core</artifactId>
             <version>1.20.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/jts-core-1.20.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
@@ -63,7 +65,8 @@
             <version>33.4</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/gt-main-33.4.jar</systemPath>
-        </dependency>        <dependency>
+        </dependency>
+        <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-api</artifactId>
             <version>33.4</version>
@@ -74,6 +77,8 @@
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-common</artifactId>
             <version>1.8.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/sedona-common-1.8.1.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -102,20 +107,20 @@
                 </configuration>
             </plugin>
 
-<!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
--->
+            <!--
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-shade-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>shade</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+            -->
         </plugins>
     </build>
 
