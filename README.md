@@ -63,27 +63,27 @@ hdfs dfs -chmod 755 hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.
 ```
 
 ```sql
-USE bdphive;
+USE bdp;
     
-create function bdphive.array_contains as 'io.datadynamics.hive.udf.array.UDFArrayContains' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_equals as 'io.datadynamics.hive.udf.array.UDFArrayEquals' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_intersect as 'io.datadynamics.hive.udf.array.UDFArrayIntersect' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_max as 'io.datadynamics.hive.udf.array.UDFArrayMax' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_min as 'io.datadynamics.hive.udf.array.UDFArrayMin' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_join as 'io.datadynamics.hive.udf.array.UDFArrayJoin' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_distinct as 'io.datadynamics.hive.udf.array.UDFArrayDistinct' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_position as 'io.datadynamics.hive.udf.array.UDFArrayPosition' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_remove as 'io.datadynamics.hive.udf.array.UDFArrayRemove' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_reverse as 'io.datadynamics.hive.udf.array.UDFArrayReverse' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_sort as 'io.datadynamics.hive.udf.array.UDFArraySort' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_concat as 'io.datadynamics.hive.udf.array.UDFArrayConcat' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_value_count as 'io.datadynamics.hive.udf.array.UDFArrayValueCount' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_slice as 'io.datadynamics.hive.udf.array.UDFArraySlice' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_element_at as 'io.datadynamics.hive.udf.array.UDFArrayElementAt' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_shuffle as 'io.datadynamics.hive.udf.array.UDFArrayShuffle' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
-create function bdphive.array_sequence as 'io.datadynamics.hive.udf.array.UDFSequence' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_contains as 'io.datadynamics.hive.udf.array.UDFArrayContains' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_equals as 'io.datadynamics.hive.udf.array.UDFArrayEquals' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_intersect as 'io.datadynamics.hive.udf.array.UDFArrayIntersect' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_max as 'io.datadynamics.hive.udf.array.UDFArrayMax' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_min as 'io.datadynamics.hive.udf.array.UDFArrayMin' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_join as 'io.datadynamics.hive.udf.array.UDFArrayJoin' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_distinct as 'io.datadynamics.hive.udf.array.UDFArrayDistinct' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_position as 'io.datadynamics.hive.udf.array.UDFArrayPosition' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_remove as 'io.datadynamics.hive.udf.array.UDFArrayRemove' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_reverse as 'io.datadynamics.hive.udf.array.UDFArrayReverse' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_sort as 'io.datadynamics.hive.udf.array.UDFArraySort' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_concat as 'io.datadynamics.hive.udf.array.UDFArrayConcat' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_value_count as 'io.datadynamics.hive.udf.array.UDFArrayValueCount' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_slice as 'io.datadynamics.hive.udf.array.UDFArraySlice' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_element_at as 'io.datadynamics.hive.udf.array.UDFArrayElementAt' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_shuffle as 'io.datadynamics.hive.udf.array.UDFArrayShuffle' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.array_sequence as 'io.datadynamics.hive.udf.array.UDFSequence' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
 
-create function bdphive.safe_divide as 'io.datadynamics.hive.udf.GenericUDFSafeDivide' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
+create function bdp.safe_divide as 'io.datadynamics.hive.udf.GenericUDFSafeDivide' USING JAR 'hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar';
 ```
 
 ## Macro
@@ -103,3 +103,79 @@ CREATE TEMPORARY MACRO try_double(s STRING)
 CREATE TEMPORARY MACRO try_date(s STRING)
 (CASE WHEN s RLIKE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN TO_DATE(s) ELSE NULL END);
 ``````
+
+# Impala GeoSpatial Functions for Oracle GeoSpatial Functions
+
+## Oracle to Impala Mapping
+
+### 1:1 대응 또는 유사한 표준 함수
+
+Impala에서 제공하는 ST_ 계열 함수로 대체 가능합니다.
+
+|Oracle 함수|Impala 대응 함수 / 방법|비고|
+|---|---|---|
+|SDO_UTIL.FROM_WKTGEOMETRY|ST_GeomFromText(string)|WKT를 Geometry 객체로 변환|
+|SDO_GEOM.SDO_LENGTH|ST_Length(geometry)|선의 길이 계산|
+|SDO_GEOM.SDO_DISTANCE|ST_Distance(geom1, geom2)|두 객체 간 최단 거리|
+|SDO_GEOM.SDO_AREA|ST_Area(poly),면적 계산|
+|SDO_GEOM.SDO_BUFFER|ST_Buffer(geom, dist)|버퍼 생성|
+|SDO_GEOM.SDO_CENTROID|ST_Centroid(geom)|무게 중심점 반환|
+|SDO_RELATE|ST_Intersects, ST_Contains 등|상황에 맞는 개별 위상 함수 사용|
+
+### MBR(최소 사각형) 관련 연산
+
+Impala는 ST_Envelope를 통해 MBR을 구하며, 좌표 추출은 별도 함수를 조합해야 합니다.
+
+|Oracle 함수|Impala 대응 방법|
+|-|-|
+|SDO_GEOM.SDO_MAX_MBR_ORDINATE|ST_MaxX(ST_Envelope(geom)) / ST_MaxY(...)|
+|SDO_GEOM.SDO_MIN_MBR_ORDINATE|ST_MinX(ST_Envelope(geom)) / ST_MinY(...)|
+
+### Impala에서 지원하지 않는 함수 및 우회 방법
+
+이 섹션의 함수들은 Impala에 내장되어 있지 않거나, 별도의 라이브러리(Esri Geometry API 등)를 사용한 UDF 등록이 필요합니다.
+
+* 공간 좌표계 및 변환 (Critical)
+  * SDO_CS.TRANSFORM: Impala는 좌표계 변환(Projection)을 자체적으로 수행하지 못합니다.
+    * 우회: 데이터를 Impala에 로드하기 전에 Python(PyProj)이나 Spark를 사용하여 단일 좌표계(예: EPSG:4326 또는 3857)로 **미리 변환(Pre-processing)**하여 저장해야 합니다.
+* 기하학적 복잡 연산
+  * SDO_GEOM.SDO_CONCAVEHULL: 지원 불가. (ConvexHull은 ST_ConvexHull로 가능하나 Concave는 불가)
+  * SDO_GEOM.SDO_CLOSEST_POINTS: 지원 불가.
+  * SDO_UTIL.SIMPLIFY: ST_Generalize(geom, distance)로 유사 기능 수행 가능 (버전에 따라 확인 필요).
+  * SDO_UTIL.RECTIFY_GEOMETRY: 지원 불가. (보통 데이터 적재 단계에서 정리 필요)
+* LRS (Linear Referencing System)
+  * SDO_LRS.SPLIT_GEOM_SEGMENT / CONVERT_TO_LRS_GEOM 등: Impala는 LRS를 지원하지 않습니다.
+    * 우회: 이 로직이 꼭 SQL View에 있어야 한다면, Java/C++로 전용 UDF를 작성하여 Impala에 등록하거나, 비즈니스 로직을 GeoServer가 아닌 데이터 처리 레이어로 옮겨야 합니다.
+* 구조적 편집 및 유효성 검사
+  * SDO_UTIL.APPEND: ST_Union(geom1, geom2)으로 우회 가능.
+  * SDO_GEOM.VALIDATE_GEOMETRY_...: ST_IsValid(geom)로 유효 여부 확인 가능.
+  * SDO_UTIL.GETVERTICES: 지원 불가.
+    * 우회: ST_AsText로 변환 후 문자열 파싱(정규식 등)을 하거나 전용 UDF 필요.
+
+### Oracle Spatial vs. Impala vs. Sedona 비교 및 대체 표
+
+|Oracle Spatial 함수|Impala (ESRI LIB)|Apache Sedona (ST_ 함수)|비고|
+|---|---|---|---|
+|FROM_WKTGEOMETRY|ST_GeomFromText|ST_GeomFromWKT|표준 WKT 변환|
+|SDO_CONCAVEHULL|❌ 지원 불가|ST_ConcaveHull|Sedona는 파라미터로 정교함 조절 가능|
+|SDO_CLOSEST_POINTS|❌ 지원 불가|ST_ClosestPoint|두 객체 간 최단 거리 지점 계산|
+|SDO_CS.TRANSFORM|❌ 지원 불가|ST_Transform|Sedona의 핵심 강점 (좌표계 변환)|
+|SDO_LRS.SPLIT_GEOM_SEGMENT|❌ 지원 불가|ST_SubLine / ST_LineSubstring|LRS 선형 참조 기반 분할 가능|
+|SDO_UTIL.EXTRACT|❌ 지원 불가|ST_GeometryN / ST_PointN|멀티 객체에서 특정 요소 추출|
+|SDO_UTIL.APPEND|ST_Union|ST_Union / ST_Collect|여러 기하 구조 합치기|
+|SDO_GEOM.SDO_LENGTH|ST_Length|ST_Length|선의 길이|
+|SDO_GEOM.SDO_DISTANCE|ST_Distance|ST_Distance|두 지점 간 거리|
+|SDO_GEOM.SDO_BUFFER|ST_Buffer|ST_Buffer|버퍼 생성|
+|CONVERT_TO_STD_GEOM|❌ (이미 표준)|❌ (자동 처리)|Sedona는 기본적으로 표준 기하학 사용|
+|SDO_UTIL.RECTIFY_GEOMETRY|❌ 지원 불가|ST_MakeValid|잘못된 Geometry 구조 교정|
+|SDO_GEOM.SDO_CENTROID|ST_Centroid|ST_Centroid|무게 중심|
+|SDO_UTIL.SIMPLIFY|ST_Generalize|ST_SimplifyPreserveTopology|형상 단순화 (위상 유지)|
+|SDO_MAX_MBR_ORDINATE|ST_MaxX, ST_MaxY|ST_XMax, ST_YMax|MBR의 최대 좌표값|
+|SDO_MIN_MBR_ORDINATE|ST_MinX, ST_MinY|ST_XMin, ST_YMin|MBR의 최소 좌표값|
+|SDO_GEOM.SDO_SELF_UNION|⚠️ ST_Union 활용|ST_UnaryUnion|자기 자신과의 결합 (Clean up 용도)|
+|SDO_UTIL.GETNUMELEM|❌ 지원 불가|ST_NumGeometries|객체 내 요소 개수|
+|CONVERT_TO_LRS_GEOM|❌ 지원 불가|ST_Force3DM / ST_AddMeasure|M 좌표(Measure)를 가진 LRS 객체 생성|
+|SDO_GEOM.SDO_AREA|ST_Area|ST_Area|면적 계산|
+|VALIDATE_GEOMETRY_...|ST_IsValid|ST_IsValidReason|오류 사유까지 상세 확인 가능|
+|SDO_UTIL.GETVERTICES|❌ 지원 불가|ST_DumpPoints|모든 꼭짓점을 개별 포인트로 전개|
+|SDO_RELATE|ST_Intersects 등|ST_Intersects, ST_Within 등|표준 위상 관계 함수로 대체|
