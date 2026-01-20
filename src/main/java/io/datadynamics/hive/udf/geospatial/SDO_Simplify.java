@@ -10,6 +10,9 @@ import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
  */
 public class SDO_Simplify extends UDF {
 
+    /**
+     * Simplifies geometry using threshold; returns serialized result
+     */
     public BytesWritable evaluate(BytesWritable geomBytes, Double threshold) {
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
 
