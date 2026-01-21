@@ -24,17 +24,16 @@ import org.locationtech.jts.io.WKTWriter;
  *
  * <h3>데이터 변환 흐름</h3>
  * <pre>
- *   Hive/Impala                      Java UDF                       결과
+ *   Hive/Impala                           Java UDF                            결과
+ *   ┌──────────────┐                      ┌─────────────┐                     ┌──────────────┐
+ *   │ BINARY(WKB)  │ ───────────────────→ │ JTS Geometry│ ──────────────────→ │ BINARY(WKB)  │
+ *   │ BytesWritable│  bytesToGeometry()   │ (공간 연산) │  geometryToBytes()  │ BytesWritable│
+ *   └──────────────┘                      └─────────────┘                     └──────────────┘
  *
- *   ┌─────────────┐                ┌─────────────┐               ┌─────────────┐
- *   │ BINARY(WKB) │ ─────────────→ │ JTS Geometry│ ────────────→ │ BINARY(WKB) │
- *   │ BytesWritable│  bytesToGeometry()  │  (공간 연산)  │  geometryToBytes()  │ BytesWritable│
- *   └─────────────┘                └─────────────┘               └─────────────┘
- *
- *   ┌─────────────┐                ┌─────────────┐               ┌─────────────┐
- *   │ STRING(WKT) │ ─────────────→ │ JTS Geometry│ ────────────→ │ STRING(WKT) │
- *   │   String    │  stringToGeometry()  │  (공간 연산)  │  geometryToString()  │   String    │
- *   └─────────────┘                └─────────────┘               └─────────────┘
+ *   ┌─────────────┐                      ┌─────────────┐                      ┌─────────────┐
+ *   │ STRING(WKT) │ ───────────────────→ │ JTS Geometry│ ───────────────────→ │ STRING(WKT) │
+ *   │   String    │  stringToGeometry()  │ (공간 연산) │  geometryToString()  │   String    │
+ *   └─────────────┘                      └─────────────┘                      └─────────────┘
  * </pre>
  *
  * <h3>WKB (Well-Known Binary) 형식</h3>
