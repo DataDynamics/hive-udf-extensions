@@ -14,6 +14,7 @@
             <directory>${project.build.directory}/classes-lib</directory>
             <outputDirectory>/</outputDirectory>
             <excludes>
+                <exclude>META-INF/MANIFEST.MF</exclude>
                 <exclude>META-INF/NOTICE</exclude>
                 <exclude>META-INF/DEPENDENCIES</exclude>
                 <exclude>META-INF/LICENSE</exclude>
@@ -21,7 +22,6 @@
                 <exclude>META-INF/*.DSA</exclude>
                 <exclude>META-INF/*.RSA</exclude>
                 <exclude>META-INF/maven/**/*</exclude>
-                <exclude>META-INF/services/**/*</exclude>
             </excludes>
         </fileSet>
     </fileSets>
