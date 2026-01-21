@@ -1,18 +1,37 @@
 package io.datadynamics.hive.udf.geospatial;
 
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class SDO_ClosestPoints_StringTest {
 
-    private final SDO_ClosestPoints_String udf = new SDO_ClosestPoints_String();
+    private SDO_ClosestPoints_String udf;
+
+    @Before
+    public void setUp() throws Exception {
+        udf = new SDO_ClosestPoints_String();
+        ObjectInspector[] arguments = new ObjectInspector[]{
+                PrimitiveObjectInspectorFactory.javaStringObjectInspector,
+                PrimitiveObjectInspectorFactory.javaStringObjectInspector
+        };
+        udf.initialize(arguments);
+    }
 
     @Test
-    public void testEvaluate_ValidWKT() {
+    public void testEvaluate_ValidWKT() throws HiveException {
         String wkt1 = "POINT (0 0)";
         String wkt2 = "POINT (10 0)";
         
-        String result = udf.evaluate(wkt1, wkt2);
+        GenericUDF.DeferredObject[] args = new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject(wkt1),
+                new GenericUDF.DeferredJavaObject(wkt2)
+        };
+        String result = (String) udf.evaluate(args);
         
         assertNotNull(result);
         assertTrue(result.contains("LINESTRING"));
@@ -21,11 +40,15 @@ public class SDO_ClosestPoints_StringTest {
     }
 
     @Test
-    public void testEvaluate_LineAndPoint() {
+    public void testEvaluate_LineAndPoint() throws HiveException {
         String wkt1 = "LINESTRING (0 0, 10 0)";
         String wkt2 = "POINT (5 5)";
         
-        String result = udf.evaluate(wkt1, wkt2);
+        GenericUDF.DeferredObject[] args = new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject(wkt1),
+                new GenericUDF.DeferredJavaObject(wkt2)
+        };
+        String result = (String) udf.evaluate(args);
         
         assertNotNull(result);
         // (5,0)과 (5,5) 사이의 최단 거리
@@ -34,28 +57,48 @@ public class SDO_ClosestPoints_StringTest {
     }
 
     @Test
-    public void testEvaluate_NullOrEmpty() {
-        assertNull(udf.evaluate(null, "POINT (0 0)"));
-        assertNull(udf.evaluate("POINT (0 0)", null));
-        assertNull(udf.evaluate("", "POINT (0 0)"));
-        assertNull(udf.evaluate("POINT (0 0)", ""));
+    public void testEvaluate_NullOrEmpty() throws HiveException {
+        assertNull(udf.evaluate(new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject(null),
+                new GenericUDF.DeferredJavaObject("POINT (0 0)")
+        }));
+        assertNull(udf.evaluate(new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject("POINT (0 0)"),
+                new GenericUDF.DeferredJavaObject(null)
+        }));
+        assertNull(udf.evaluate(new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject(""),
+                new GenericUDF.DeferredJavaObject("POINT (0 0)")
+        }));
+        assertNull(udf.evaluate(new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject("POINT (0 0)"),
+                new GenericUDF.DeferredJavaObject("")
+        }));
     }
 
     @Test
-    public void testEvaluate_InvalidWKT() {
+    public void testEvaluate_InvalidWKT() throws HiveException {
         String invalidWkt = "INVALID(0 0)";
         String validWkt = "POINT (10 0)";
         
-        assertNull(udf.evaluate(invalidWkt, validWkt));
+        GenericUDF.DeferredObject[] args = new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject(invalidWkt),
+                new GenericUDF.DeferredJavaObject(validWkt)
+        };
+        assertNull(udf.evaluate(args));
     }
 
     @Test
-    public void testEvaluate_3D() {
+    public void testEvaluate_3D() throws HiveException {
         // JTS DistanceOp는 기본적으로 2D 평면 거리 기준이지만, GeometryUtils에서 3D WKT를 지원하는지 확인
         String wkt1 = "POINT Z (0 0 0)";
         String wkt2 = "POINT Z (10 0 0)";
         
-        String result = udf.evaluate(wkt1, wkt2);
+        GenericUDF.DeferredObject[] args = new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject(wkt1),
+                new GenericUDF.DeferredJavaObject(wkt2)
+        };
+        String result = (String) udf.evaluate(args);
         
         assertNotNull(result);
         // GeometryUtils.geometryToString(3)이 적용되어 Z 좌표가 보존되는지 확인

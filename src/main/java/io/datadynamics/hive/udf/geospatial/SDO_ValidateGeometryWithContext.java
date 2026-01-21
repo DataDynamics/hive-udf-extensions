@@ -1,6 +1,11 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.valid.IsValidOp;
@@ -126,41 +131,32 @@ import org.locationtech.jts.operation.valid.TopologyValidationError;
  *   <li>ST_IsValidReason (PostGIS) - 유사 기능의 PostGIS 함수</li>
  * </ul>
  *
- * @see UDF
  * @see IsValidOp
  * @see TopologyValidationError
  * @see <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/spatl/SDO_GEOM-reference.html">Oracle SDO_GEOM.VALIDATE_GEOMETRY_WITH_CONTEXT</a>
  * @see <a href="https://locationtech.github.io/jts/javadoc/org/locationtech/jts/operation/valid/TopologyValidationError.html">JTS TopologyValidationError</a>
  */
-public class SDO_ValidateGeometryWithContext extends UDF {
+public class SDO_ValidateGeometryWithContext extends GenericUDF {
 
-    /**
-     * 공간 객체의 기하학적 유효성을 검사하고 상세한 결과 문자열을 반환합니다.
-     *
-     * <p>OGC Simple Feature 표준에 따른 유효성 규칙을 검사하며,
-     * 오류 발생 시 오류 유형과 발생 좌표를 포함한 상세 정보를 제공합니다.</p>
-     *
-     * <h4>처리 흐름</h4>
-     * <ol>
-     *   <li>BytesWritable을 JTS Geometry 객체로 변환</li>
-     *   <li>NULL 입력 체크 → "NULL GEOMETRY" 반환</li>
-     *   <li>IsValidOp으로 유효성 검사 수행</li>
-     *   <li>유효한 경우 → "TRUE" 반환</li>
-     *   <li>유효하지 않은 경우 → TopologyValidationError에서 오류 정보 추출</li>
-     *   <li>"FALSE: [오류 메시지] at [좌표]" 형식으로 반환</li>
-     * </ol>
-     *
-     * @param geomBytes WKB(Well-Known Binary) 형식의 공간 객체 바이트 배열.
-     *                  null인 경우 "NULL GEOMETRY" 반환
-     * @return 유효성 검사 결과 문자열:
-     * <ul>
-     *   <li><b>"TRUE"</b>: 도형이 유효함</li>
-     *   <li><b>"NULL GEOMETRY"</b>: 입력이 null이거나 파싱 실패</li>
-     *   <li><b>"FALSE: [오류] at [좌표]"</b>: 도형이 유효하지 않음
-     *       (예: "FALSE: Self-intersection at (10.5, 20.3)")</li>
-     * </ul>
-     */
-    public String evaluate(BytesWritable geomBytes) {
+    private transient BinaryObjectInspector geomOI;
+
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length != 1) {
+            throw new UDFArgumentException("SDO_ValidateGeometryWithContext requires 1 argument");
+        }
+        if (!(arguments[0] instanceof BinaryObjectInspector)) {
+            throw new UDFArgumentException("SDO_ValidateGeometryWithContext requires a binary argument");
+        }
+        this.geomOI = (BinaryObjectInspector) arguments[0];
+        return PrimitiveObjectInspectorFactory.javaStringObjectInspector;
+    }
+
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        Object geomObj = arguments[0].get();
+        BytesWritable geomBytes = geomOI.getPrimitiveWritableObject(geomObj);
+
         // 바이트 배열을 JTS Geometry 객체로 변환
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
 
@@ -168,7 +164,6 @@ public class SDO_ValidateGeometryWithContext extends UDF {
         if (geom == null) return "NULL GEOMETRY";
 
         // OGC Simple Feature 표준에 따른 유효성 검사 수행
-        // IsValidOp은 다양한 토폴로지 규칙 위반을 검사
         IsValidOp isValidOp = new IsValidOp(geom);
 
         if (isValidOp.isValid()) {
@@ -176,14 +171,15 @@ public class SDO_ValidateGeometryWithContext extends UDF {
             return "TRUE";
         } else {
             // 유효성 검사 실패 시 상세 오류 정보 추출
-            // TopologyValidationError는 오류 유형과 발생 위치(좌표)를 포함
             TopologyValidationError err = isValidOp.getValidationError();
 
             // 형식: "FALSE: [오류 메시지] at [좌표]"
-            // 예: "FALSE: Self-intersection at (10.5, 20.3)"
-            // err.getMessage(): 오류 유형 설명 (예: "Self-intersection")
-            // err.getCoordinate(): 오류 발생 좌표 (X, Y)
             return String.format("FALSE: %s at %s", err.getMessage(), err.getCoordinate());
         }
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_ValidateGeometryWithContext", children);
     }
 }

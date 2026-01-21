@@ -1,6 +1,12 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.DoubleObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -89,52 +95,40 @@ import org.locationtech.jts.linearref.LengthIndexedLine;
  *   <li>SDO_LRS.LOCATE_PT - 특정 M값의 좌표 반환</li>
  * </ul>
  *
- * @see UDF
  * @see LengthIndexedLine
  * @see <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/spatl/SDO_LRS-reference.html">Oracle SDO_LRS.SPLIT_GEOM_SEGMENT</a>
  * @see <a href="https://locationtech.github.io/jts/javadoc/org/locationtech/jts/linearref/LengthIndexedLine.html">JTS LengthIndexedLine</a>
  */
-public class SDO_SplitGeomSegment extends UDF {
+public class SDO_SplitGeomSegment extends GenericUDF {
 
-    /**
-     * JTS GeometryFactory 인스턴스.
-     * GeometryCollection 생성에 사용되며, 스레드 안전하므로 재사용합니다.
-     */
     private final GeometryFactory factory = new GeometryFactory();
+    private transient BinaryObjectInspector geomOI;
+    private transient DoubleObjectInspector splitMeasureOI;
 
-    /**
-     * 선형 객체를 지정된 거리(Measure) 값을 기준으로 두 개의 세그먼트로 분할합니다.
-     *
-     * <p>JTS의 {@link LengthIndexedLine}을 사용하여 선형 참조 기반 분할을 수행합니다.
-     * 분할 결과는 두 개의 세그먼트를 포함하는 GeometryCollection으로 반환됩니다.</p>
-     *
-     * <h4>처리 흐름</h4>
-     * <ol>
-     *   <li>BytesWritable을 JTS Geometry 객체로 변환</li>
-     *   <li>LengthIndexedLine으로 선형 참조 시스템 초기화</li>
-     *   <li>분할 지점의 유효성 검증 (시작~끝 범위 내)</li>
-     *   <li>시작점~분할점, 분할점~끝점 두 세그먼트 추출</li>
-     *   <li>GeometryCollection으로 묶어서 반환</li>
-     * </ol>
-     *
-     * @param geomBytes    WKB(Well-Known Binary) 형식의 선형 공간 객체 바이트 배열.
-     *                     LINESTRING, MULTILINESTRING 등 선형 타입이어야 합니다.
-     *                     null인 경우 null 반환
-     * @param splitMeasure 분할 기준 거리(Measure) 값.
-     *                     선형 객체의 시작점으로부터의 거리를 나타냅니다.
-     *                     <ul>
-     *                       <li>단위: 좌표계의 단위와 동일 (예: 미터, 도)</li>
-     *                       <li>유효 범위: 0 ~ 선형 객체의 총 길이</li>
-     *                     </ul>
-     *                     null이거나 범위를 벗어난 경우 null 반환
-     * @return 분할된 두 세그먼트를 포함하는 GeometryCollection의 WKB 바이트 배열.
-     * <ul>
-     *   <li>요소[0]: 시작점 ~ 분할점 세그먼트</li>
-     *   <li>요소[1]: 분할점 ~ 끝점 세그먼트</li>
-     * </ul>
-     * 입력이 null이거나 분할 지점이 유효하지 않은 경우 null 반환
-     */
-    public BytesWritable evaluate(BytesWritable geomBytes, Double splitMeasure) {
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length != 2) {
+            throw new UDFArgumentException("SDO_SplitGeomSegment requires 2 arguments");
+        }
+        if (!(arguments[0] instanceof BinaryObjectInspector)) {
+            throw new UDFArgumentException("SDO_SplitGeomSegment requires a binary argument as the first parameter");
+        }
+        if (!(arguments[1] instanceof DoubleObjectInspector)) {
+            throw new UDFArgumentException("SDO_SplitGeomSegment requires a double argument as the second parameter");
+        }
+        this.geomOI = (BinaryObjectInspector) arguments[0];
+        this.splitMeasureOI = (DoubleObjectInspector) arguments[1];
+        return PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
+    }
+
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        Object geomObj = arguments[0].get();
+        Object splitMeasureObj = arguments[1].get();
+
+        BytesWritable geomBytes = geomOI.getPrimitiveWritableObject(geomObj);
+        Double splitMeasure = (splitMeasureObj == null) ? null : splitMeasureOI.get(splitMeasureObj);
+
         // 바이트 배열을 JTS Geometry 객체로 변환
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
 
@@ -142,8 +136,6 @@ public class SDO_SplitGeomSegment extends UDF {
         if (geom == null || splitMeasure == null) return null;
 
         // JTS LengthIndexedLine 초기화
-        // LengthIndexedLine은 선형 객체를 거리(length) 기반으로 참조할 수 있게 해주는 클래스
-        // 내부적으로 선형 객체의 각 정점까지의 누적 거리를 계산하여 인덱싱
         LengthIndexedLine lil = new LengthIndexedLine(geom);
 
         // 선형 객체의 시작 인덱스(항상 0)와 끝 인덱스(총 길이) 획득
@@ -151,23 +143,24 @@ public class SDO_SplitGeomSegment extends UDF {
         double endIndex = lil.getEndIndex();      // 끝점: 선형 객체의 총 길이
 
         // 분할 지점 유효성 검증
-        // 분할 지점은 반드시 [시작, 끝] 범위 내에 있어야 함
         if (splitMeasure < startIndex || splitMeasure > endIndex) {
-            // 범위를 벗어난 분할 지점은 처리 불가
             return null;
         }
 
         // 선형 객체를 두 세그먼트로 분할
-        // extractLine(start, end): 지정된 구간의 부분 선형 객체 추출
         Geometry seg1 = lil.extractLine(startIndex, splitMeasure);  // 시작점 ~ 분할점
         Geometry seg2 = lil.extractLine(splitMeasure, endIndex);    // 분할점 ~ 끝점
 
         // 두 세그먼트를 GeometryCollection으로 묶어서 반환
-        // GeometryCollection은 여러 도형을 하나의 객체로 그룹화
         Geometry[] geometries = new Geometry[]{seg1, seg2};
         Geometry result = factory.createGeometryCollection(geometries);
 
         // 결과를 WKB 바이트 배열로 변환하여 반환
         return GeometryUtils.geometryToBytes(result);
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_SplitGeomSegment", children);
     }
 }

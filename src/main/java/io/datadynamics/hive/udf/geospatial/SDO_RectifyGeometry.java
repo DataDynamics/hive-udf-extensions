@@ -1,6 +1,11 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.valid.IsValidOp;
@@ -84,39 +89,32 @@ import org.locationtech.jts.operation.valid.IsValidOp;
  *   <li>ST_MakeValid (PostGIS) - 동일 기능의 PostGIS 함수</li>
  * </ul>
  *
- * @see UDF
+ * @see GenericUDF
  * @see IsValidOp
  * @see <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/spatl/SDO_UTIL-reference.html">Oracle SDO_UTIL.RECTIFY_GEOMETRY</a>
  * @see <a href="https://locationtech.github.io/jts/javadoc/org/locationtech/jts/operation/valid/IsValidOp.html">JTS IsValidOp</a>
  */
-public class SDO_RectifyGeometry extends UDF {
+public class SDO_RectifyGeometry extends GenericUDF {
 
-    /**
-     * 유효하지 않은 공간 객체를 수정하여 유효한 형태로 반환합니다.
-     *
-     * <p>입력된 도형이 이미 유효한 경우 원본을 그대로 반환하고,
-     * 유효하지 않은 경우 buffer(0) 연산을 통해 토폴로지를 재구성합니다.</p>
-     *
-     * <h4>처리 흐름</h4>
-     * <ol>
-     *   <li>BytesWritable을 JTS Geometry 객체로 변환</li>
-     *   <li>IsValidOp을 사용하여 유효성 검사</li>
-     *   <li>유효한 경우: 원본 바이트 그대로 반환 (성능 최적화)</li>
-     *   <li>유효하지 않은 경우: buffer(0) 연산으로 수정 후 반환</li>
-     *   <li>수정 실패 시: NULL 반환</li>
-     * </ol>
-     *
-     * @param geomBytes WKB(Well-Known Binary) 형식의 공간 객체 바이트 배열.
-     *                  null인 경우 null 반환
-     * @return 수정된 공간 객체의 WKB 바이트 배열.
-     * <ul>
-     *   <li>입력이 null인 경우: null</li>
-     *   <li>이미 유효한 경우: 원본 geomBytes 그대로 반환</li>
-     *   <li>수정 성공: 수정된 도형의 WKB 바이트</li>
-     *   <li>수정 실패: null</li>
-     * </ul>
-     */
-    public BytesWritable evaluate(BytesWritable geomBytes) {
+    private transient BinaryObjectInspector geomOI;
+
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length != 1) {
+            throw new UDFArgumentException("SDO_RectifyGeometry requires 1 argument");
+        }
+        if (!(arguments[0] instanceof BinaryObjectInspector)) {
+            throw new UDFArgumentException("SDO_RectifyGeometry requires a binary argument");
+        }
+        this.geomOI = (BinaryObjectInspector) arguments[0];
+        return PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
+    }
+
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        Object geomObj = arguments[0].get();
+        BytesWritable geomBytes = geomOI.getPrimitiveWritableObject(geomObj);
+
         // 바이트 배열을 JTS Geometry 객체로 변환
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
 
@@ -144,5 +142,10 @@ public class SDO_RectifyGeometry extends UDF {
             // NULL을 반환하여 데이터 품질 문제를 명시적으로 표시
             return null;
         }
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_RectifyGeometry", children);
     }
 }

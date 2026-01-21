@@ -1,6 +1,12 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.DoubleObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
@@ -70,52 +76,35 @@ import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
  * @see org.locationtech.jts.simplify.DouglasPeuckerSimplifier
  * @see <a href="https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm">Douglas-Peucker Algorithm (Wikipedia)</a>
  */
-public class SDO_Simplify extends UDF {
+public class SDO_Simplify extends GenericUDF {
 
-    /**
-     * 주어진 geometry를 지정된 허용 오차(threshold)로 단순화합니다.
-     *
-     * <p>이 메서드는 {@link TopologyPreservingSimplifier}를 사용하여 입력 geometry의
-     * 정점 수를 줄이면서 위상 관계를 보존합니다. 단순화 결과는 직렬화된 바이트 배열로 반환됩니다.</p>
-     *
-     * <h3>처리 흐름</h3>
-     * <ol>
-     *   <li>입력된 바이트 배열을 JTS Geometry 객체로 역직렬화</li>
-     *   <li>입력값 유효성 검사 (null 체크)</li>
-     *   <li>TopologyPreservingSimplifier를 사용하여 geometry 단순화</li>
-     *   <li>결과 geometry를 바이트 배열로 직렬화하여 반환</li>
-     * </ol>
-     *
-     * <h3>지원 Geometry 타입</h3>
-     * <ul>
-     *   <li>Point - 단순화 효과 없음 (정점이 1개이므로)</li>
-     *   <li>LineString - 정점 수 감소</li>
-     *   <li>Polygon - 외부/내부 링의 정점 수 감소</li>
-     *   <li>MultiPoint - 단순화 효과 없음</li>
-     *   <li>MultiLineString - 각 LineString에 대해 단순화 적용</li>
-     *   <li>MultiPolygon - 각 Polygon에 대해 단순화 적용</li>
-     *   <li>GeometryCollection - 각 구성요소에 대해 단순화 적용</li>
-     * </ul>
-     *
-     * <h3>주의 사항</h3>
-     * <ul>
-     *   <li>threshold 값이 0이면 원본 geometry가 그대로 반환됩니다.</li>
-     *   <li>threshold 값이 너무 크면 geometry가 과도하게 단순화되어 형태가 왜곡될 수 있습니다.</li>
-     *   <li>매우 작은 geometry에 큰 threshold를 적용하면 빈 geometry가 반환될 수 있습니다.</li>
-     * </ul>
-     *
-     * @param geomBytes 단순화할 geometry의 직렬화된 바이트 배열 (WKB 형식)
-     *                  null인 경우 null을 반환합니다.
-     * @param threshold 단순화에 사용할 허용 오차(tolerance) 값
-     *                  이 값은 좌표계의 단위(도 또는 미터)에 따라 해석됩니다.
-     *                  양수 값이어야 하며, null인 경우 null을 반환합니다.
-     * @return 단순화된 geometry의 직렬화된 바이트 배열
-     * 입력이 null이거나 유효하지 않은 경우 null을 반환합니다.
-     * @see GeometryUtils#bytesToGeometry(BytesWritable) 바이트 배열을 Geometry로 변환
-     * @see GeometryUtils#geometryToBytes(Geometry) Geometry를 바이트 배열로 변환
-     * @see TopologyPreservingSimplifier#simplify(Geometry, double) 위상 보존 단순화 수행
-     */
-    public BytesWritable evaluate(BytesWritable geomBytes, Double threshold) {
+    private transient BinaryObjectInspector geomOI;
+    private transient DoubleObjectInspector thresholdOI;
+
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length != 2) {
+            throw new UDFArgumentException("SDO_Simplify requires 2 arguments");
+        }
+        if (!(arguments[0] instanceof BinaryObjectInspector)) {
+            throw new UDFArgumentException("SDO_Simplify requires a binary argument as the first parameter");
+        }
+        if (!(arguments[1] instanceof DoubleObjectInspector)) {
+            throw new UDFArgumentException("SDO_Simplify requires a double argument as the second parameter");
+        }
+        this.geomOI = (BinaryObjectInspector) arguments[0];
+        this.thresholdOI = (DoubleObjectInspector) arguments[1];
+        return PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
+    }
+
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        Object geomObj = arguments[0].get();
+        Object thresholdObj = arguments[1].get();
+
+        BytesWritable geomBytes = geomOI.getPrimitiveWritableObject(geomObj);
+        Double threshold = (thresholdObj == null) ? null : thresholdOI.get(thresholdObj);
+
         // 1. 입력 바이트 배열을 JTS Geometry 객체로 역직렬화
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
 
@@ -130,6 +119,11 @@ public class SDO_Simplify extends UDF {
 
         // 4. 단순화된 geometry를 바이트 배열로 직렬화하여 반환
         return GeometryUtils.geometryToBytes(simplified);
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_Simplify", children);
     }
 
 }

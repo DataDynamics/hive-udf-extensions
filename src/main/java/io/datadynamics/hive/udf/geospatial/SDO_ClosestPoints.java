@@ -1,6 +1,11 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -108,78 +113,33 @@ import org.locationtech.jts.operation.distance.DistanceOp;
  * @see org.locationtech.jts.operation.distance.DistanceOp#nearestPoints(Geometry, Geometry) 최단 거리 점 계산
  * @see GeometryFactory LineString 생성에 사용
  */
-public class SDO_ClosestPoints extends UDF {
+public class SDO_ClosestPoints extends GenericUDF {
 
-    /**
-     * JTS Geometry 객체를 생성하기 위한 팩토리 인스턴스입니다.
-     *
-     * <p>이 팩토리는 결과 LineString을 생성하는 데 사용됩니다.
-     * 인스턴스 변수로 선언하여 매 호출마다 새로운 객체를 생성하는 오버헤드를 방지합니다.</p>
-     *
-     * <p>GeometryFactory는 스레드 안전(thread-safe)하므로,
-     * 멀티스레드 환경에서도 단일 인스턴스를 안전하게 공유할 수 있습니다.</p>
-     */
     private final GeometryFactory factory = new GeometryFactory();
+    private transient BinaryObjectInspector geom1OI;
+    private transient BinaryObjectInspector geom2OI;
 
-    /**
-     * 두 Geometry 간의 최단 거리를 형성하는 두 점을 찾아 LineString으로 반환합니다.
-     *
-     * <p>이 메서드는 JTS의 {@link DistanceOp#nearestPoints(Geometry, Geometry)}를 사용하여
-     * 두 Geometry 사이의 최단 거리를 형성하는 점 쌍을 계산하고,
-     * 이 두 점을 연결하는 LineString을 생성하여 반환합니다.</p>
-     *
-     * <h3>처리 흐름</h3>
-     * <ol>
-     *   <li>입력된 두 바이트 배열을 JTS Geometry 객체로 역직렬화</li>
-     *   <li>입력값 유효성 검사 (null 체크)</li>
-     *   <li>DistanceOp.nearestPoints()를 사용하여 최단 거리 점 쌍 계산</li>
-     *   <li>계산된 두 점을 연결하는 LineString 생성</li>
-     *   <li>결과 LineString을 바이트 배열로 직렬화하여 반환</li>
-     * </ol>
-     *
-     * <h3>결과 LineString의 구조</h3>
-     * <pre>
-     * nearestCoords[0] ─────────────────── nearestCoords[1]
-     *        ↑                                    ↑
-     *   geom1 위의 점                        geom2 위의 점
-     * (첫 번째 Geometry에서                (두 번째 Geometry에서
-     *  가장 가까운 점)                      가장 가까운 점)
-     * </pre>
-     *
-     * <h3>특수 케이스</h3>
-     * <ul>
-     *   <li><b>두 Geometry가 교차</b>: 교차점이 양쪽 점으로 반환 (거리 = 0)</li>
-     *   <li><b>두 Geometry가 접촉</b>: 접점이 양쪽 점으로 반환 (거리 = 0)</li>
-     *   <li><b>Point와 Point</b>: 두 Point 자체가 반환됨</li>
-     *   <li><b>동일한 Geometry</b>: 같은 점이 두 번 반환됨 (거리 = 0)</li>
-     * </ul>
-     *
-     * <h3>성능 고려사항</h3>
-     * <ul>
-     *   <li>시간 복잡도: O(n * m), n과 m은 각 Geometry의 정점 수</li>
-     *   <li>복잡한 Geometry의 경우 계산 시간이 증가할 수 있음</li>
-     *   <li>대량 처리 시 미리 단순화(simplify)하면 성능 향상 가능</li>
-     * </ul>
-     *
-     * @param geom1Bytes 첫 번째 Geometry의 직렬화된 바이트 배열 (WKB 형식)
-     *                   최단 거리 점 쌍 중 첫 번째 점이 이 Geometry 위에 위치합니다.
-     *                   null인 경우 null을 반환합니다.
-     * @param geom2Bytes 두 번째 Geometry의 직렬화된 바이트 배열 (WKB 형식)
-     *                   최단 거리 점 쌍 중 두 번째 점이 이 Geometry 위에 위치합니다.
-     *                   null인 경우 null을 반환합니다.
-     * @return 두 최단 거리 점을 연결하는 LineString의 직렬화된 바이트 배열
-     * <ul>
-     *   <li>시작점: geom1 위의 가장 가까운 점</li>
-     *   <li>끝점: geom2 위의 가장 가까운 점</li>
-     *   <li>LineString의 길이 = 두 Geometry 간의 최단 거리</li>
-     * </ul>
-     * 입력이 null이거나 계산에 실패한 경우 null을 반환합니다.
-     * @see DistanceOp#nearestPoints(Geometry, Geometry) 최단 거리 점 쌍 계산
-     * @see GeometryFactory#createLineString(Coordinate[]) LineString 생성
-     * @see GeometryUtils#bytesToGeometry(BytesWritable) 바이트 배열을 Geometry로 변환
-     * @see GeometryUtils#geometryToBytes(Geometry) Geometry를 바이트 배열로 변환
-     */
-    public BytesWritable evaluate(BytesWritable geom1Bytes, BytesWritable geom2Bytes) {
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length != 2) {
+            throw new UDFArgumentException("SDO_ClosestPoints requires 2 arguments");
+        }
+        if (!(arguments[0] instanceof BinaryObjectInspector) || !(arguments[1] instanceof BinaryObjectInspector)) {
+            throw new UDFArgumentException("SDO_ClosestPoints requires 2 binary arguments");
+        }
+        this.geom1OI = (BinaryObjectInspector) arguments[0];
+        this.geom2OI = (BinaryObjectInspector) arguments[1];
+        return PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
+    }
+
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        Object g1Obj = arguments[0].get();
+        Object g2Obj = arguments[1].get();
+
+        BytesWritable geom1Bytes = geom1OI.getPrimitiveWritableObject(g1Obj);
+        BytesWritable geom2Bytes = geom2OI.getPrimitiveWritableObject(g2Obj);
+
         // 1. 입력 바이트 배열을 JTS Geometry 객체로 역직렬화
         Geometry g1 = GeometryUtils.bytesToGeometry(geom1Bytes);
         Geometry g2 = GeometryUtils.bytesToGeometry(geom2Bytes);
@@ -207,6 +167,11 @@ public class SDO_ClosestPoints extends UDF {
 
         // 7. 계산 실패 시 null 반환
         return null;
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_ClosestPoints", children);
     }
 
 }

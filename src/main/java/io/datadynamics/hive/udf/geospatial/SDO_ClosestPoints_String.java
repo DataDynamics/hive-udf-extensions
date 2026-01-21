@@ -1,6 +1,11 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -143,56 +148,34 @@ import org.locationtech.jts.operation.distance.DistanceOp;
  *   <li>ST_Distance - 두 도형 간의 최단 거리 (숫자로 반환)</li>
  * </ul>
  *
- * @see UDF
  * @see DistanceOp
  * @see <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/spatl/SDO_GEOM-reference.html">Oracle SDO_GEOM.SDO_CLOSEST_POINTS</a>
  * @see <a href="https://locationtech.github.io/jts/javadoc/org/locationtech/jts/operation/distance/DistanceOp.html">JTS DistanceOp</a>
  */
-public class SDO_ClosestPoints_String extends UDF {
+public class SDO_ClosestPoints_String extends GenericUDF {
 
-    /**
-     * JTS GeometryFactory 인스턴스.
-     * LINESTRING 생성에 사용되며, 스레드 안전하므로 재사용합니다.
-     */
     private final GeometryFactory factory = new GeometryFactory();
+    private transient StringObjectInspector wkt1OI;
+    private transient StringObjectInspector wkt2OI;
 
-    /**
-     * 두 공간 객체 간의 최근접점을 계산하여 연결 선분을 반환합니다.
-     *
-     * <p>JTS의 {@link DistanceOp}를 사용하여 두 도형 사이의 최단 거리를 형성하는
-     * 점 쌍을 계산하고, 이 두 점을 연결하는 LINESTRING을 WKT 문자열로 반환합니다.</p>
-     *
-     * <h4>처리 흐름</h4>
-     * <ol>
-     *   <li>WKT 문자열을 JTS Geometry 객체로 변환</li>
-     *   <li>DistanceOp.nearestPoints()로 최근접점 쌍 계산</li>
-     *   <li>두 좌표를 연결하는 LINESTRING 생성</li>
-     *   <li>결과를 WKT 문자열로 반환</li>
-     * </ol>
-     *
-     * <h4>알고리즘 개요</h4>
-     * <p>JTS DistanceOp는 다음과 같이 동작합니다:</p>
-     * <ol>
-     *   <li>두 도형의 모든 정점과 변을 검사</li>
-     *   <li>정점-정점, 정점-변, 변-변 거리를 계산</li>
-     *   <li>최소 거리를 형성하는 점 쌍을 반환</li>
-     * </ol>
-     *
-     * @param wkt1 첫 번째 공간 객체의 WKT(Well-Known Text) 문자열.
-     *             POINT, LINESTRING, POLYGON 등 모든 도형 타입 가능.
-     *             null인 경우 null 반환
-     * @param wkt2 두 번째 공간 객체의 WKT(Well-Known Text) 문자열.
-     *             POINT, LINESTRING, POLYGON 등 모든 도형 타입 가능.
-     *             null인 경우 null 반환
-     * @return 두 도형의 최근접점을 연결하는 LINESTRING의 WKT 문자열.
-     * <ul>
-     *   <li>정상: "LINESTRING (x1 y1, x2 y2)" 형식</li>
-     *   <li>입력이 null인 경우: null</li>
-     *   <li>WKT 파싱 실패: null</li>
-     *   <li>두 도형이 접촉: 길이 0인 LINESTRING (두 점이 동일)</li>
-     * </ul>
-     */
-    public String evaluate(String wkt1, String wkt2) {
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length != 2) {
+            throw new UDFArgumentException("SDO_ClosestPoints_String requires 2 arguments");
+        }
+        if (!(arguments[0] instanceof StringObjectInspector) || !(arguments[1] instanceof StringObjectInspector)) {
+            throw new UDFArgumentException("SDO_ClosestPoints_String requires 2 string arguments");
+        }
+        this.wkt1OI = (StringObjectInspector) arguments[0];
+        this.wkt2OI = (StringObjectInspector) arguments[1];
+        return PrimitiveObjectInspectorFactory.javaStringObjectInspector;
+    }
+
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        String wkt1 = wkt1OI.getPrimitiveJavaObject(arguments[0].get());
+        String wkt2 = wkt2OI.getPrimitiveJavaObject(arguments[1].get());
+
         // WKT 문자열을 JTS Geometry 객체로 변환
         Geometry g1 = GeometryUtils.stringToGeometry(wkt1);
         Geometry g2 = GeometryUtils.stringToGeometry(wkt2);
@@ -217,6 +200,11 @@ public class SDO_ClosestPoints_String extends UDF {
 
         // 최근접점 계산 실패 시 null 반환
         return null;
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_ClosestPoints_String", children);
     }
 
 }

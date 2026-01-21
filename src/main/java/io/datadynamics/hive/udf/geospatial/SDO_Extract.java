@@ -1,6 +1,12 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.IntObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
@@ -93,113 +99,44 @@ import org.locationtech.jts.geom.Polygon;
  * @see org.locationtech.jts.geom.Polygon#getExteriorRing() 외곽선 추출에 사용
  * @see org.locationtech.jts.geom.Polygon#getInteriorRingN(int) 구멍 추출에 사용
  */
-public class SDO_Extract extends UDF {
+public class SDO_Extract extends GenericUDF {
 
-    /**
-     * 복합 Geometry에서 n번째 Element를 추출합니다.
-     *
-     * <p>이 메서드는 ringIndex를 0으로 설정하여 {@link #evaluate(BytesWritable, Integer, Integer)}를
-     * 호출하는 편의 메서드입니다. Ring 추출 없이 Element 전체를 반환합니다.</p>
-     *
-     * <h3>사용 예시</h3>
-     * <pre>{@code
-     * -- MultiPolygon에서 두 번째 Polygon 추출
-     * SELECT SDO_Extract(geom, 2) FROM table;
-     *
-     * -- GeometryCollection에서 첫 번째 Element 추출
-     * SELECT SDO_Extract(geom_collection, 1) FROM table;
-     * }</pre>
-     *
-     * @param geomBytes 추출 대상이 되는 복합 Geometry의 직렬화된 바이트 배열 (WKB 형식)
-     * @param elemIndex 추출할 Element의 인덱스 (1부터 시작, Oracle 호환)
-     *                  1 = 첫 번째 Element, 2 = 두 번째 Element, ...
-     * @return 추출된 Element의 직렬화된 바이트 배열
-     * 입력이 null이거나 인덱스가 범위를 벗어난 경우 null 반환
-     * @see #evaluate(BytesWritable, Integer, Integer) 전체 기능을 제공하는 메서드
-     */
-    public BytesWritable evaluate(BytesWritable geomBytes, Integer elemIndex) {
-        return evaluate(geomBytes, elemIndex, 0);
+    private transient BinaryObjectInspector geomOI;
+    private transient IntObjectInspector elemIdxOI;
+    private transient IntObjectInspector ringIdxOI;
+
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length < 2 || arguments.length > 3) {
+            throw new UDFArgumentException("SDO_Extract requires 2 or 3 arguments");
+        }
+        if (!(arguments[0] instanceof BinaryObjectInspector)) {
+            throw new UDFArgumentException("SDO_Extract requires a binary argument as the first parameter");
+        }
+        if (!(arguments[1] instanceof IntObjectInspector)) {
+            throw new UDFArgumentException("SDO_Extract requires an int argument as the second parameter");
+        }
+        this.geomOI = (BinaryObjectInspector) arguments[0];
+        this.elemIdxOI = (IntObjectInspector) arguments[1];
+        if (arguments.length == 3) {
+            if (!(arguments[2] instanceof IntObjectInspector)) {
+                throw new UDFArgumentException("SDO_Extract requires an int argument as the third parameter");
+            }
+            this.ringIdxOI = (IntObjectInspector) arguments[2];
+        }
+        return PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
     }
 
-    /**
-     * 복합 Geometry에서 n번째 Element 또는 해당 Element의 특정 Ring을 추출합니다.
-     *
-     * <p>이 메서드는 두 단계로 동작합니다:</p>
-     * <ol>
-     *   <li><b>Element 추출</b>: 복합 Geometry에서 elemIndex에 해당하는 하위 Geometry 추출</li>
-     *   <li><b>Ring 추출 (선택적)</b>: 추출된 Element가 Polygon이고 ringIndex가 지정된 경우,
-     *       해당 Ring(외곽선 또는 구멍) 추출</li>
-     * </ol>
-     *
-     * <h3>처리 흐름</h3>
-     * <pre>
-     * 입력 Geometry
-     *      │
-     *      ▼
-     * ┌────────────────────────┐
-     * │ elemIndex로 Element 추출 │
-     * │ (Oracle 1-based → 0-based)│
-     * └────────────────────────┘
-     *      │
-     *      ▼
-     * ┌────────────────────────┐
-     * │ ringIndex 확인          │
-     * │ (0 또는 null → Element 반환)│
-     * └────────────────────────┘
-     *      │ ringIndex > 0 && Polygon
-     *      ▼
-     * ┌────────────────────────┐
-     * │ Ring 추출               │
-     * │ 1 → Exterior Ring       │
-     * │ 2+ → Interior Ring      │
-     * └────────────────────────┘
-     * </pre>
-     *
-     * <h3>인덱스 변환 규칙</h3>
-     * <table border="1">
-     *   <tr><th>Oracle (입력)</th><th>Java (내부)</th><th>대상</th></tr>
-     *   <tr><td>elemIndex = 1</td><td>eIdx = 0</td><td>첫 번째 Element</td></tr>
-     *   <tr><td>ringIndex = 0</td><td>rIdx = -1</td><td>Ring 추출 안 함</td></tr>
-     *   <tr><td>ringIndex = 1</td><td>rIdx = 0</td><td>Exterior Ring</td></tr>
-     *   <tr><td>ringIndex = 2</td><td>rIdx = 1 → innerIdx = 0</td><td>첫 번째 Interior Ring</td></tr>
-     * </table>
-     *
-     * <h3>에러 처리</h3>
-     * <ul>
-     *   <li>geomBytes가 null인 경우: null 반환</li>
-     *   <li>elemIndex가 null인 경우: null 반환</li>
-     *   <li>elemIndex가 범위를 벗어난 경우: null 반환</li>
-     *   <li>ringIndex가 범위를 벗어난 경우: null 반환</li>
-     *   <li>Element가 Polygon이 아닌데 ringIndex > 0인 경우: Element 반환</li>
-     * </ul>
-     *
-     * @param geomBytes 추출 대상이 되는 복합 Geometry의 직렬화된 바이트 배열 (WKB 형식)
-     * @param elemIndex 추출할 Element의 인덱스 (1부터 시작, Oracle 호환)
-     *                  <ul>
-     *                    <li>1 = 첫 번째 Element</li>
-     *                    <li>2 = 두 번째 Element</li>
-     *                    <li>n = n번째 Element</li>
-     *                  </ul>
-     * @param ringIndex 추출할 Ring의 인덱스 (1부터 시작, Oracle 호환)
-     *                  <ul>
-     *                    <li>0 또는 null = Ring 추출 안 함 (Element 전체 반환)</li>
-     *                    <li>1 = Exterior Ring (외곽선)</li>
-     *                    <li>2 = 첫 번째 Interior Ring (첫 번째 구멍)</li>
-     *                    <li>n = (n-1)번째 Interior Ring</li>
-     *                  </ul>
-     * @return 추출된 Geometry의 직렬화된 바이트 배열
-     * <ul>
-     *   <li>Element 추출 시: Geometry (Polygon, LineString, Point 등)</li>
-     *   <li>Ring 추출 시: LinearRing</li>
-     *   <li>에러 시: null</li>
-     * </ul>
-     * @see GeometryUtils#bytesToGeometry(BytesWritable) 바이트 배열을 Geometry로 변환
-     * @see GeometryUtils#geometryToBytes(Geometry) Geometry를 바이트 배열로 변환
-     * @see Geometry#getGeometryN(int) 복합 Geometry에서 하위 Geometry 추출
-     * @see Polygon#getExteriorRing() 폴리곤의 외곽선 추출
-     * @see Polygon#getInteriorRingN(int) 폴리곤의 내부 링(구멍) 추출
-     */
-    public BytesWritable evaluate(BytesWritable geomBytes, Integer elemIndex, Integer ringIndex) {
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        Object geomObj = arguments[0].get();
+        Object elemIdxObj = arguments[1].get();
+        Object ringIdxObj = (arguments.length == 3) ? arguments[2].get() : null;
+
+        BytesWritable geomBytes = geomOI.getPrimitiveWritableObject(geomObj);
+        Integer elemIndex = (elemIdxObj == null) ? null : elemIdxOI.get(elemIdxObj);
+        Integer ringIndex = (ringIdxObj == null) ? null : ringIdxOI.get(ringIdxObj);
+
         // 1. 입력 바이트 배열을 JTS Geometry 객체로 역직렬화
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
 
@@ -256,5 +193,10 @@ public class SDO_Extract extends UDF {
 
         // 9. 유효하지 않은 Ring 인덱스인 경우 null 반환
         return null;
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_Extract", children);
     }
 }

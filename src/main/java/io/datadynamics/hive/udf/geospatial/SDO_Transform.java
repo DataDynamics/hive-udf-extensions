@@ -1,6 +1,12 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
 import org.apache.hadoop.io.BytesWritable;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.api.referencing.operation.MathTransform;
@@ -95,48 +101,45 @@ import org.locationtech.jts.geom.Geometry;
  *   <li>ST_SetSRID - SRID 설정 (변환 없이 메타데이터만 변경)</li>
  * </ul>
  *
- * @see UDF
  * @see CRS
  * @see MathTransform
  * @see <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/spatl/SDO_CS-reference.html">Oracle SDO_CS.TRANSFORM</a>
  * @see <a href="https://epsg.io/">EPSG.io - 좌표계 코드 검색</a>
  * @see <a href="https://docs.geotools.org/latest/userguide/library/referencing/crs.html">GeoTools CRS Tutorial</a>
  */
-public class SDO_Transform extends UDF {
+public class SDO_Transform extends GenericUDF {
 
-    /**
-     * 공간 객체의 좌표 참조 시스템을 변환합니다.
-     *
-     * <p>GeoTools의 CRS 라이브러리를 사용하여 EPSG 코드 기반 좌표 변환을 수행합니다.
-     * 변환 후 결과 도형에는 대상 좌표계의 SRID가 설정됩니다.</p>
-     *
-     * <h4>처리 흐름</h4>
-     * <ol>
-     *   <li>BytesWritable을 JTS Geometry 객체로 변환</li>
-     *   <li>EPSG 코드로부터 소스/대상 CRS 객체 생성</li>
-     *   <li>두 CRS 간의 MathTransform 획득</li>
-     *   <li>JTS.transform()으로 좌표 변환 수행</li>
-     *   <li>결과 도형에 대상 SRID 설정</li>
-     *   <li>WKB 바이트 배열로 반환</li>
-     * </ol>
-     *
-     * @param geomBytes     WKB(Well-Known Binary) 형식의 공간 객체 바이트 배열.
-     *                      null인 경우 null 반환
-     * @param sourceCrsCode 원본 좌표계의 EPSG 코드 문자열.
-     *                      형식: "EPSG:코드번호" (예: "EPSG:4326", "EPSG:5186")
-     *                      null인 경우 null 반환
-     * @param targetCrsCode 변환 대상 좌표계의 EPSG 코드 문자열.
-     *                      형식: "EPSG:코드번호" (예: "EPSG:3857", "EPSG:32652")
-     *                      null인 경우 null 반환
-     * @return 좌표 변환된 공간 객체의 WKB 바이트 배열.
-     * <ul>
-     *   <li>입력이 null인 경우: null</li>
-     *   <li>EPSG 코드가 유효하지 않은 경우: null</li>
-     *   <li>변환 실패 시: null</li>
-     *   <li>성공 시: 변환된 도형 (SRID가 대상 좌표계로 설정됨)</li>
-     * </ul>
-     */
-    public BytesWritable evaluate(BytesWritable geomBytes, String sourceCrsCode, String targetCrsCode) {
+    private transient BinaryObjectInspector geomOI;
+    private transient StringObjectInspector sourceCrsOI;
+    private transient StringObjectInspector targetCrsOI;
+
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length != 3) {
+            throw new UDFArgumentException("SDO_Transform requires 3 arguments");
+        }
+        if (!(arguments[0] instanceof BinaryObjectInspector)) {
+            throw new UDFArgumentException("SDO_Transform requires a binary argument as the first parameter");
+        }
+        if (!(arguments[1] instanceof StringObjectInspector) || !(arguments[2] instanceof StringObjectInspector)) {
+            throw new UDFArgumentException("SDO_Transform requires string arguments for CRS codes");
+        }
+        this.geomOI = (BinaryObjectInspector) arguments[0];
+        this.sourceCrsOI = (StringObjectInspector) arguments[1];
+        this.targetCrsOI = (StringObjectInspector) arguments[2];
+        return PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
+    }
+
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        Object geomObj = arguments[0].get();
+        Object sourceCrsObj = arguments[1].get();
+        Object targetCrsObj = arguments[2].get();
+
+        BytesWritable geomBytes = geomOI.getPrimitiveWritableObject(geomObj);
+        String sourceCrsCode = sourceCrsOI.getPrimitiveJavaObject(sourceCrsObj);
+        String targetCrsCode = targetCrsOI.getPrimitiveJavaObject(targetCrsObj);
+
         // 바이트 배열을 JTS Geometry 객체로 변환
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
 
@@ -145,43 +148,35 @@ public class SDO_Transform extends UDF {
 
         try {
             // GeoTools를 이용한 좌표계 디코딩
-            // EPSG 코드(예: "EPSG:4326")를 CoordinateReferenceSystem 객체로 변환
-            // 내부적으로 EPSG 데이터베이스에서 좌표계 정의를 조회
             CoordinateReferenceSystem sourceCRS = CRS.decode(sourceCrsCode);
             CoordinateReferenceSystem targetCRS = CRS.decode(targetCrsCode);
 
             // lenient=true: 버사 변환(Bursa-Wolf) 파라미터가 없어도 변환 허용
-            // 약간의 정밀도 손실이 있을 수 있으나, 대부분의 경우 실용적으로 충분
             boolean lenient = true;
 
             // 두 좌표계 간의 수학적 변환 객체 획득
-            // 내부적으로 적절한 변환 경로를 자동으로 탐색 (직접 변환 또는 중간 좌표계 경유)
             MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, lenient);
 
             // JTS Geometry 객체의 모든 좌표를 변환
-            // 내부적으로 각 좌표점에 MathTransform을 적용
             Geometry transformedGeom = JTS.transform(geom, transform);
 
             // 변환된 도형에 대상 좌표계의 SRID 설정
-            // SRID는 공간 데이터베이스에서 좌표계를 식별하는 정수 코드
-            // 예: "EPSG:4326" → SRID 4326
             try {
                 String[] split = targetCrsCode.split(":");
                 int srid = Integer.parseInt(split[1]);
                 transformedGeom.setSRID(srid);
             } catch (Exception ignore) {
-                // EPSG 코드 파싱 실패 시 SRID 설정 생략
-                // 도형 자체는 정상적으로 변환되었으므로 계속 진행
             }
 
             // 변환된 도형을 WKB 바이트 배열로 반환
             return GeometryUtils.geometryToBytes(transformedGeom);
         } catch (Exception e) {
-            // 변환 실패 원인:
-            // 1. 잘못된 EPSG 코드 (존재하지 않는 좌표계)
-            // 2. 지원되지 않는 변환 경로 (두 좌표계 간 변환 방법 없음)
-            // 3. 좌표값이 대상 좌표계의 유효 범위를 벗어남
             return null;
         }
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_Transform", children);
     }
 }

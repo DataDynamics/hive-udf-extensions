@@ -1,6 +1,11 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -9,11 +14,33 @@ import org.locationtech.jts.geom.GeometryFactory;
  * 두 기하학 객체를 단순히 하나의 객체로 합친다.
  * 공간적 Union(합집합) 연산이 아니라, 데이터 구조적 병합(예: LineString + LineString = MultiLineString)을 의미한다.
  */
-public class SDO_Append extends UDF {
+public class SDO_Append extends GenericUDF {
 
     private final GeometryFactory factory = new GeometryFactory();
+    private transient BinaryObjectInspector g1OI;
+    private transient BinaryObjectInspector g2OI;
 
-    public BytesWritable evaluate(BytesWritable g1Bytes, BytesWritable g2Bytes) {
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length != 2) {
+            throw new UDFArgumentException("SDO_Append requires 2 arguments");
+        }
+        if (!(arguments[0] instanceof BinaryObjectInspector) || !(arguments[1] instanceof BinaryObjectInspector)) {
+            throw new UDFArgumentException("SDO_Append requires 2 binary arguments");
+        }
+        this.g1OI = (BinaryObjectInspector) arguments[0];
+        this.g2OI = (BinaryObjectInspector) arguments[1];
+        return PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
+    }
+
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        Object g1Obj = arguments[0].get();
+        Object g2Obj = arguments[1].get();
+
+        BytesWritable g1Bytes = g1OI.getPrimitiveWritableObject(g1Obj);
+        BytesWritable g2Bytes = g2OI.getPrimitiveWritableObject(g2Obj);
+
         Geometry g1 = GeometryUtils.bytesToGeometry(g1Bytes);
         Geometry g2 = GeometryUtils.bytesToGeometry(g2Bytes);
 
@@ -26,6 +53,11 @@ public class SDO_Append extends UDF {
         // 더 정교한 구현을 위해서는 입력 타입(Polygon, LineString)을 확인하여
         // MultiPolygon, MultiLineString 등 구체적 타입으로 반환할 수 있음
         return GeometryUtils.geometryToBytes(factory.createGeometryCollection(geometries));
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_Append", children);
     }
 
 }

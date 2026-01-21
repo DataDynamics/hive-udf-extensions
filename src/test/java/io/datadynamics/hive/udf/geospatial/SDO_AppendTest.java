@@ -1,5 +1,9 @@
 package io.datadynamics.hive.udf.geospatial;
 
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,22 +19,33 @@ public class SDO_AppendTest {
 
     private SDO_Append udf;
     private GeometryFactory factory;
+    private ObjectInspector[] arguments;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         udf = new SDO_Append();
         factory = new GeometryFactory();
+        arguments = new ObjectInspector[]{
+                PrimitiveObjectInspectorFactory.writableBinaryObjectInspector,
+                PrimitiveObjectInspectorFactory.writableBinaryObjectInspector
+        };
+        udf.initialize(arguments);
     }
 
     @Test
-    public void testEvaluate_Success() {
+    public void testEvaluate_Success() throws HiveException {
         Point p1 = factory.createPoint(new Coordinate(1, 1));
         Point p2 = factory.createPoint(new Coordinate(2, 2));
 
         BytesWritable g1Bytes = GeometryUtils.geometryToBytes(p1);
         BytesWritable g2Bytes = GeometryUtils.geometryToBytes(p2);
 
-        BytesWritable resultBytes = udf.evaluate(g1Bytes, g2Bytes);
+        GenericUDF.DeferredObject[] deferredObjects = new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject(g1Bytes),
+                new GenericUDF.DeferredJavaObject(g2Bytes)
+        };
+
+        BytesWritable resultBytes = (BytesWritable) udf.evaluate(deferredObjects);
         assertNotNull(resultBytes);
 
         Geometry result = GeometryUtils.bytesToGeometry(resultBytes);
@@ -47,32 +62,43 @@ public class SDO_AppendTest {
     }
 
     @Test
-    public void testEvaluate_FirstNull() {
+    public void testEvaluate_FirstNull() throws HiveException {
         Point p2 = factory.createPoint(new Coordinate(2, 2));
         BytesWritable g2Bytes = GeometryUtils.geometryToBytes(p2);
 
-        BytesWritable resultBytes = udf.evaluate(null, g2Bytes);
+        GenericUDF.DeferredObject[] deferredObjects = new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject(null),
+                new GenericUDF.DeferredJavaObject(g2Bytes)
+        };
+
+        BytesWritable resultBytes = (BytesWritable) udf.evaluate(deferredObjects);
         
-        // SDO_Append.java:20: if (g1 == null) return g2Bytes;
-        // g1은 bytesToGeometry(null) 결과가 null이면 return g2Bytes 함.
         assertSame(g2Bytes, resultBytes);
     }
 
     @Test
-    public void testEvaluate_SecondNull() {
+    public void testEvaluate_SecondNull() throws HiveException {
         Point p1 = factory.createPoint(new Coordinate(1, 1));
         BytesWritable g1Bytes = GeometryUtils.geometryToBytes(p1);
 
-        BytesWritable resultBytes = udf.evaluate(g1Bytes, null);
+        GenericUDF.DeferredObject[] deferredObjects = new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject(g1Bytes),
+                new GenericUDF.DeferredJavaObject(null)
+        };
+
+        BytesWritable resultBytes = (BytesWritable) udf.evaluate(deferredObjects);
         
-        // SDO_Append.java:21: if (g2 == null) return g1Bytes;
         assertSame(g1Bytes, resultBytes);
     }
 
     @Test
-    public void testEvaluate_BothNull() {
-        // g1이 null이면 바로 g2Bytes를 리턴함. g2Bytes가 null이면 null 리턴.
-        BytesWritable resultBytes = udf.evaluate(null, null);
+    public void testEvaluate_BothNull() throws HiveException {
+        GenericUDF.DeferredObject[] deferredObjects = new GenericUDF.DeferredObject[]{
+                new GenericUDF.DeferredJavaObject(null),
+                new GenericUDF.DeferredJavaObject(null)
+        };
+
+        BytesWritable resultBytes = (BytesWritable) udf.evaluate(deferredObjects);
         assertNull(resultBytes);
     }
 }

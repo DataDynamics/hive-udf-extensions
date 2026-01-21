@@ -1,6 +1,12 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.DoubleObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.Geometry;
@@ -123,56 +129,39 @@ import org.locationtech.jts.geom.Geometry;
  *   <li>ST_AlphaShape (PostGIS) - Alpha Shape 알고리즘</li>
  * </ul>
  *
- * @see UDF
  * @see ConcaveHull
  * @see <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/spatl/SDO_GEOM-reference.html">Oracle SDO_GEOM.SDO_CONCAVEHULL</a>
  * @see <a href="https://locationtech.github.io/jts/javadoc/org/locationtech/jts/algorithm/hull/ConcaveHull.html">JTS ConcaveHull</a>
  */
-public class SDO_ConcaveHull extends UDF {
+public class SDO_ConcaveHull extends GenericUDF {
 
-    /**
-     * 입력 도형에 대한 Concave Hull(오목 껍질)을 계산합니다.
-     *
-     * <p>JTS의 ConcaveHull 알고리즘을 사용하여 입력 도형(점 집합, 라인, 폴리곤)을
-     * 감싸는 오목한 경계 다각형을 생성합니다. tolerance 파라미터로 오목함의 정도를
-     * 제어할 수 있습니다.</p>
-     *
-     * <h4>처리 흐름</h4>
-     * <ol>
-     *   <li>BytesWritable을 JTS Geometry 객체로 변환</li>
-     *   <li>ConcaveHull 객체 생성</li>
-     *   <li>tolerance 값이 유효한 경우 최대 변 길이 설정</li>
-     *   <li>Concave Hull 계산 수행</li>
-     *   <li>결과를 WKB 바이트 배열로 반환</li>
-     * </ol>
-     *
-     * <h4>알고리즘 개요</h4>
-     * <p>JTS ConcaveHull 알고리즘은 다음과 같이 동작합니다:</p>
-     * <ol>
-     *   <li>입력 점들의 Delaunay Triangulation(들로네 삼각분할) 생성</li>
-     *   <li>외곽 삼각형의 변 중 최대 길이를 초과하는 변 제거</li>
-     *   <li>남은 삼각형들의 외곽 경계를 연결하여 Concave Hull 생성</li>
-     * </ol>
-     *
-     * @param geomBytes WKB(Well-Known Binary) 형식의 공간 객체 바이트 배열.
-     *                  POINT, MULTIPOINT, LINESTRING, POLYGON 등 모든 도형 타입 가능.
-     *                  null인 경우 null 반환
-     * @param tolerance 최대 변(edge) 길이 제한값.
-     *                  <ul>
-     *                    <li>단위: 좌표계의 단위와 동일 (예: 미터, 도)</li>
-     *                    <li>값이 클수록: Convex Hull에 가까운 결과</li>
-     *                    <li>값이 작을수록: 더 오목한 결과 (점 분포를 세밀하게 따라감)</li>
-     *                    <li>NULL: JTS가 자동으로 적절한 값을 계산</li>
-     *                    <li>0 이하: NULL과 동일하게 자동 계산</li>
-     *                  </ul>
-     * @return Concave Hull 폴리곤의 WKB 바이트 배열.
-     * <ul>
-     *   <li>입력이 null인 경우: null</li>
-     *   <li>점이 3개 미만인 경우: 입력 도형 또는 빈 폴리곤</li>
-     *   <li>정상적인 경우: 오목한 경계 폴리곤</li>
-     * </ul>
-     */
-    public BytesWritable evaluate(BytesWritable geomBytes, Double tolerance) {
+    private transient BinaryObjectInspector geomOI;
+    private transient DoubleObjectInspector toleranceOI;
+
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length != 2) {
+            throw new UDFArgumentException("SDO_ConcaveHull requires 2 arguments");
+        }
+        if (!(arguments[0] instanceof BinaryObjectInspector)) {
+            throw new UDFArgumentException("SDO_ConcaveHull requires a binary argument as the first parameter");
+        }
+        if (!(arguments[1] instanceof DoubleObjectInspector)) {
+            throw new UDFArgumentException("SDO_ConcaveHull requires a double argument as the second parameter");
+        }
+        this.geomOI = (BinaryObjectInspector) arguments[0];
+        this.toleranceOI = (DoubleObjectInspector) arguments[1];
+        return PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
+    }
+
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        Object geomObj = arguments[0].get();
+        Object toleranceObj = arguments[1].get();
+
+        BytesWritable geomBytes = geomOI.getPrimitiveWritableObject(geomObj);
+        Double tolerance = (toleranceObj == null) ? null : toleranceOI.get(toleranceObj);
+
         // 바이트 배열을 JTS Geometry 객체로 변환
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
 
@@ -197,6 +186,11 @@ public class SDO_ConcaveHull extends UDF {
 
         // 결과를 WKB 바이트 배열로 변환하여 반환
         return GeometryUtils.geometryToBytes(result);
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_ConcaveHull", children);
     }
 
 }

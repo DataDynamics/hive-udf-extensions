@@ -1,6 +1,11 @@
 package io.datadynamics.hive.udf.geospatial;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.locationtech.jts.geom.Geometry;
 
@@ -109,86 +114,42 @@ import org.locationtech.jts.geom.Geometry;
  *   <li>ST_RemoveRepeatedPoints - 중복 좌표 제거</li>
  * </ul>
  *
- * @see UDF
  * @see <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/spatl/SDO_UTIL-reference.html">Oracle SDO_UTIL.CONVERT_GEOMETRY</a>
  * @see <a href="https://locationtech.github.io/jts/javadoc/org/locationtech/jts/geom/CoordinateSequenceFilter.html">JTS CoordinateSequenceFilter</a>
  */
-public class SDO_ConvertToStdGeom extends UDF {
+public class SDO_ConvertToStdGeom extends GenericUDF {
 
-    /**
-     * 공간 객체에서 M(Measure) 차원을 제거하여 표준 형식으로 변환합니다.
-     *
-     * <p>입력된 XYZM 또는 XYM 좌표를 가진 도형에서 M 값을 제거하여
-     * XYZ 또는 XY 형식의 표준 도형으로 변환합니다.</p>
-     *
-     * <h4>처리 흐름 (완전 구현 시)</h4>
-     * <ol>
-     *   <li>BytesWritable을 JTS Geometry 객체로 변환</li>
-     *   <li>좌표 차원 확인 (XY, XYZ, XYM, XYZM)</li>
-     *   <li>M 차원이 있는 경우 CoordinateSequenceFilter로 M 값 제거</li>
-     *   <li>변환된 좌표로 새 Geometry 생성</li>
-     *   <li>WKB 바이트 배열로 반환</li>
-     * </ol>
-     *
-     * <h4>현재 구현</h4>
-     * <p>플레이스홀더로서 입력을 그대로 반환합니다.
-     * 실제 M 차원 제거 로직은 {@code CoordinateSequenceFilter}를 사용하여
-     * 구현해야 합니다.</p>
-     *
-     * @param geomBytes WKB(Well-Known Binary) 형식의 공간 객체 바이트 배열.
-     *                  XYZM 또는 XYM 차원의 좌표를 포함할 수 있음.
-     *                  null인 경우 null 반환
-     * @return M 차원이 제거된 표준 공간 객체의 WKB 바이트 배열.
-     * <ul>
-     *   <li>입력이 null인 경우: null</li>
-     *   <li>XYZM → XYZ: M 값이 제거된 3D 도형</li>
-     *   <li>XYM → XY: M 값이 제거된 2D 도형</li>
-     *   <li>XYZ, XY: 변환 없이 그대로 반환</li>
-     * </ul>
-     * <p><b>현재:</b> 플레이스홀더로 입력을 그대로 반환</p>
-     */
-    public BytesWritable evaluate(BytesWritable geomBytes) {
+    private transient BinaryObjectInspector geomOI;
+
+    @Override
+    public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
+        if (arguments.length != 1) {
+            throw new UDFArgumentException("SDO_ConvertToStdGeom requires 1 argument");
+        }
+        if (!(arguments[0] instanceof BinaryObjectInspector)) {
+            throw new UDFArgumentException("SDO_ConvertToStdGeom requires a binary argument");
+        }
+        this.geomOI = (BinaryObjectInspector) arguments[0];
+        return PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
+    }
+
+    @Override
+    public Object evaluate(DeferredObject[] arguments) throws HiveException {
+        Object geomObj = arguments[0].get();
+        BytesWritable geomBytes = geomOI.getPrimitiveWritableObject(geomObj);
+
         // 바이트 배열을 JTS Geometry 객체로 변환
         Geometry geom = GeometryUtils.bytesToGeometry(geomBytes);
 
         // null 입력 처리
         if (geom == null) return null;
 
-        // ============================================================
-        // 현재 구현: 플레이스홀더 (입력을 그대로 반환)
-        // ============================================================
-        // JTS는 기본적으로 XY, XYZ를 지원하며, M 차원 처리는 제한적입니다.
-        // 완전한 M 차원 제거 구현을 위해서는 다음 접근 방식을 사용해야 합니다:
-        //
-        // 방법 1: CoordinateSequenceFilter 사용
-        // -----------------------------------------
-        // geom.apply(new CoordinateSequenceFilter() {
-        //     @Override
-        //     public void filter(CoordinateSequence seq, int i) {
-        //         // M 값을 NaN으로 설정하여 무효화
-        //         if (seq.hasM()) {
-        //             seq.setOrdinate(i, CoordinateSequence.M, Double.NaN);
-        //         }
-        //     }
-        //     @Override
-        //     public boolean isDone() { return false; }
-        //     @Override
-        //     public boolean isGeometryChanged() { return true; }
-        // });
-        //
-        // 방법 2: 새로운 CoordinateSequence 생성
-        // -----------------------------------------
-        // 원본 좌표에서 XY(Z)만 추출하여 새로운 CoordinateSequence를 생성하고,
-        // 이를 기반으로 새로운 Geometry 객체를 구성합니다.
-        //
-        // 방법 3: WKT 변환 활용
-        // -----------------------------------------
-        // 도형을 WKT로 변환 시 M 값을 제외하고 파싱하여 새 도형 생성
-        // (성능이 떨어질 수 있음)
-        // ============================================================
-
         // 플레이스홀더: 입력을 그대로 반환
-        // TODO: 위의 방법 중 하나를 선택하여 M 차원 제거 로직 구현 필요
         return geomBytes;
+    }
+
+    @Override
+    public String getDisplayString(String[] children) {
+        return getStandardDisplayString("SDO_ConvertToStdGeom", children);
     }
 }
