@@ -168,13 +168,12 @@ public class SDO_ClosestPoints extends UDF {
      *                   최단 거리 점 쌍 중 두 번째 점이 이 Geometry 위에 위치합니다.
      *                   null인 경우 null을 반환합니다.
      * @return 두 최단 거리 점을 연결하는 LineString의 직렬화된 바이트 배열
-     *         <ul>
-     *           <li>시작점: geom1 위의 가장 가까운 점</li>
-     *           <li>끝점: geom2 위의 가장 가까운 점</li>
-     *           <li>LineString의 길이 = 두 Geometry 간의 최단 거리</li>
-     *         </ul>
-     *         입력이 null이거나 계산에 실패한 경우 null을 반환합니다.
-     *
+     * <ul>
+     *   <li>시작점: geom1 위의 가장 가까운 점</li>
+     *   <li>끝점: geom2 위의 가장 가까운 점</li>
+     *   <li>LineString의 길이 = 두 Geometry 간의 최단 거리</li>
+     * </ul>
+     * 입력이 null이거나 계산에 실패한 경우 null을 반환합니다.
      * @see DistanceOp#nearestPoints(Geometry, Geometry) 최단 거리 점 쌍 계산
      * @see GeometryFactory#createLineString(Coordinate[]) LineString 생성
      * @see GeometryUtils#bytesToGeometry(BytesWritable) 바이트 배열을 Geometry로 변환

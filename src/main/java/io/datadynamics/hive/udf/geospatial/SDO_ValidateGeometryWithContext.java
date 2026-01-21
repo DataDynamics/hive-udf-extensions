@@ -153,12 +153,12 @@ public class SDO_ValidateGeometryWithContext extends UDF {
      * @param geomBytes WKB(Well-Known Binary) 형식의 공간 객체 바이트 배열.
      *                  null인 경우 "NULL GEOMETRY" 반환
      * @return 유효성 검사 결과 문자열:
-     *         <ul>
-     *           <li><b>"TRUE"</b>: 도형이 유효함</li>
-     *           <li><b>"NULL GEOMETRY"</b>: 입력이 null이거나 파싱 실패</li>
-     *           <li><b>"FALSE: [오류] at [좌표]"</b>: 도형이 유효하지 않음
-     *               (예: "FALSE: Self-intersection at (10.5, 20.3)")</li>
-     *         </ul>
+     * <ul>
+     *   <li><b>"TRUE"</b>: 도형이 유효함</li>
+     *   <li><b>"NULL GEOMETRY"</b>: 입력이 null이거나 파싱 실패</li>
+     *   <li><b>"FALSE: [오류] at [좌표]"</b>: 도형이 유효하지 않음
+     *       (예: "FALSE: Self-intersection at (10.5, 20.3)")</li>
+     * </ul>
      */
     public String evaluate(BytesWritable geomBytes) {
         // 바이트 배열을 JTS Geometry 객체로 변환

@@ -109,12 +109,12 @@ public class SDO_RectifyGeometry extends UDF {
      * @param geomBytes WKB(Well-Known Binary) 형식의 공간 객체 바이트 배열.
      *                  null인 경우 null 반환
      * @return 수정된 공간 객체의 WKB 바이트 배열.
-     *         <ul>
-     *           <li>입력이 null인 경우: null</li>
-     *           <li>이미 유효한 경우: 원본 geomBytes 그대로 반환</li>
-     *           <li>수정 성공: 수정된 도형의 WKB 바이트</li>
-     *           <li>수정 실패: null</li>
-     *         </ul>
+     * <ul>
+     *   <li>입력이 null인 경우: null</li>
+     *   <li>이미 유효한 경우: 원본 geomBytes 그대로 반환</li>
+     *   <li>수정 성공: 수정된 도형의 WKB 바이트</li>
+     *   <li>수정 실패: null</li>
+     * </ul>
      */
     public BytesWritable evaluate(BytesWritable geomBytes) {
         // 바이트 배열을 JTS Geometry 객체로 변환

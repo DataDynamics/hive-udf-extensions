@@ -129,12 +129,12 @@ public class SDO_Transform extends UDF {
      *                      형식: "EPSG:코드번호" (예: "EPSG:3857", "EPSG:32652")
      *                      null인 경우 null 반환
      * @return 좌표 변환된 공간 객체의 WKB 바이트 배열.
-     *         <ul>
-     *           <li>입력이 null인 경우: null</li>
-     *           <li>EPSG 코드가 유효하지 않은 경우: null</li>
-     *           <li>변환 실패 시: null</li>
-     *           <li>성공 시: 변환된 도형 (SRID가 대상 좌표계로 설정됨)</li>
-     *         </ul>
+     * <ul>
+     *   <li>입력이 null인 경우: null</li>
+     *   <li>EPSG 코드가 유효하지 않은 경우: null</li>
+     *   <li>변환 실패 시: null</li>
+     *   <li>성공 시: 변환된 도형 (SRID가 대상 좌표계로 설정됨)</li>
+     * </ul>
      */
     public BytesWritable evaluate(BytesWritable geomBytes, String sourceCrsCode, String targetCrsCode) {
         // 바이트 배열을 JTS Geometry 객체로 변환

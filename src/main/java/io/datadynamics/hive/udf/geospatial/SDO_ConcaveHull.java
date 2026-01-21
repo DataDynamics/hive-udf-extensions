@@ -166,11 +166,11 @@ public class SDO_ConcaveHull extends UDF {
      *                    <li>0 이하: NULL과 동일하게 자동 계산</li>
      *                  </ul>
      * @return Concave Hull 폴리곤의 WKB 바이트 배열.
-     *         <ul>
-     *           <li>입력이 null인 경우: null</li>
-     *           <li>점이 3개 미만인 경우: 입력 도형 또는 빈 폴리곤</li>
-     *           <li>정상적인 경우: 오목한 경계 폴리곤</li>
-     *         </ul>
+     * <ul>
+     *   <li>입력이 null인 경우: null</li>
+     *   <li>점이 3개 미만인 경우: 입력 도형 또는 빈 폴리곤</li>
+     *   <li>정상적인 경우: 오목한 경계 폴리곤</li>
+     * </ul>
      */
     public BytesWritable evaluate(BytesWritable geomBytes, Double tolerance) {
         // 바이트 배열을 JTS Geometry 객체로 변환

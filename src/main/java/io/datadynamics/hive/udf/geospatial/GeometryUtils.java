@@ -182,11 +182,11 @@ public class GeometryUtils {
      * @param wkb Hive/Impala BINARY 타입의 WKB 데이터.
      *            null이거나 길이가 0인 경우 null 반환
      * @return 파싱된 JTS Geometry 객체.
-     *         <ul>
-     *           <li>입력이 null이거나 비어있는 경우: null</li>
-     *           <li>WKB 파싱 실패(잘못된 형식): null</li>
-     *           <li>성공: POINT, LINESTRING, POLYGON 등의 Geometry 객체</li>
-     *         </ul>
+     * <ul>
+     *   <li>입력이 null이거나 비어있는 경우: null</li>
+     *   <li>WKB 파싱 실패(잘못된 형식): null</li>
+     *   <li>성공: POINT, LINESTRING, POLYGON 등의 Geometry 객체</li>
+     * </ul>
      */
     public static Geometry bytesToGeometry(BytesWritable wkb) {
         // null 또는 빈 입력 처리
@@ -224,10 +224,10 @@ public class GeometryUtils {
      * @param geom 변환할 JTS Geometry 객체.
      *             null인 경우 null 반환
      * @return WKB 바이트를 포함하는 BytesWritable.
-     *         <ul>
-     *           <li>입력이 null인 경우: null</li>
-     *           <li>성공: WKB 형식의 바이트를 포함하는 BytesWritable</li>
-     *         </ul>
+     * <ul>
+     *   <li>입력이 null인 경우: null</li>
+     *   <li>성공: WKB 형식의 바이트를 포함하는 BytesWritable</li>
+     * </ul>
      */
     public static BytesWritable geometryToBytes(Geometry geom) {
         // null 입력 처리
@@ -260,11 +260,11 @@ public class GeometryUtils {
      * @param wkt WKT(Well-Known Text) 형식의 공간 객체 문자열.
      *            null이거나 비어있는 경우 null 반환
      * @return 파싱된 JTS Geometry 객체.
-     *         <ul>
-     *           <li>입력이 null이거나 비어있는 경우: null</li>
-     *           <li>WKT 파싱 실패(잘못된 형식): null</li>
-     *           <li>성공: POINT, LINESTRING, POLYGON 등의 Geometry 객체</li>
-     *         </ul>
+     * <ul>
+     *   <li>입력이 null이거나 비어있는 경우: null</li>
+     *   <li>WKT 파싱 실패(잘못된 형식): null</li>
+     *   <li>성공: POINT, LINESTRING, POLYGON 등의 Geometry 객체</li>
+     * </ul>
      */
     public static Geometry stringToGeometry(String wkt) {
         // null 또는 빈 문자열 처리
@@ -299,10 +299,10 @@ public class GeometryUtils {
      * @param geom 변환할 JTS Geometry 객체.
      *             null인 경우 null 반환
      * @return WKT 형식의 문자열.
-     *         <ul>
-     *           <li>입력이 null인 경우: null</li>
-     *           <li>성공: "POINT (30 10)" 등의 WKT 문자열</li>
-     *         </ul>
+     * <ul>
+     *   <li>입력이 null인 경우: null</li>
+     *   <li>성공: "POINT (30 10)" 등의 WKT 문자열</li>
+     * </ul>
      */
     public static String geometryToString(Geometry geom) {
         // null 입력 처리

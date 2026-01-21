@@ -80,8 +80,8 @@ public class SDO_MaxMbrOrdinate extends UDF {
      *   <li>ordinatePos에 따라 MaxX 또는 MaxY 반환</li>
      * </ol>
      *
-     * @param geomBytes  WKB(Well-Known Binary) 형식의 공간 객체 바이트 배열.
-     *                   null인 경우 null 반환
+     * @param geomBytes   WKB(Well-Known Binary) 형식의 공간 객체 바이트 배열.
+     *                    null인 경우 null 반환
      * @param ordinatePos 좌표축 인덱스. Oracle Spatial 호환 인덱스 사용
      *                    <ul>
      *                      <li>1: X축 (경도 방향) - MaxX 반환</li>
@@ -89,7 +89,7 @@ public class SDO_MaxMbrOrdinate extends UDF {
      *                    </ul>
      *                    null이거나 1, 2가 아닌 경우 null 반환
      * @return 지정된 축의 최댓값 (Double).
-     *         입력이 null이거나 유효하지 않은 ordinatePos인 경우 null 반환
+     * 입력이 null이거나 유효하지 않은 ordinatePos인 경우 null 반환
      */
     public Double evaluate(BytesWritable geomBytes, Integer ordinatePos) {
         // 바이트 배열을 JTS Geometry 객체로 변환

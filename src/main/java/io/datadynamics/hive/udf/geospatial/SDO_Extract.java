@@ -114,8 +114,7 @@ public class SDO_Extract extends UDF {
      * @param elemIndex 추출할 Element의 인덱스 (1부터 시작, Oracle 호환)
      *                  1 = 첫 번째 Element, 2 = 두 번째 Element, ...
      * @return 추출된 Element의 직렬화된 바이트 배열
-     *         입력이 null이거나 인덱스가 범위를 벗어난 경우 null 반환
-     *
+     * 입력이 null이거나 인덱스가 범위를 벗어난 경우 null 반환
      * @see #evaluate(BytesWritable, Integer, Integer) 전체 기능을 제공하는 메서드
      */
     public BytesWritable evaluate(BytesWritable geomBytes, Integer elemIndex) {
@@ -189,12 +188,11 @@ public class SDO_Extract extends UDF {
      *                    <li>n = (n-1)번째 Interior Ring</li>
      *                  </ul>
      * @return 추출된 Geometry의 직렬화된 바이트 배열
-     *         <ul>
-     *           <li>Element 추출 시: Geometry (Polygon, LineString, Point 등)</li>
-     *           <li>Ring 추출 시: LinearRing</li>
-     *           <li>에러 시: null</li>
-     *         </ul>
-     *
+     * <ul>
+     *   <li>Element 추출 시: Geometry (Polygon, LineString, Point 등)</li>
+     *   <li>Ring 추출 시: LinearRing</li>
+     *   <li>에러 시: null</li>
+     * </ul>
      * @see GeometryUtils#bytesToGeometry(BytesWritable) 바이트 배열을 Geometry로 변환
      * @see GeometryUtils#geometryToBytes(Geometry) Geometry를 바이트 배열로 변환
      * @see Geometry#getGeometryN(int) 복합 Geometry에서 하위 Geometry 추출

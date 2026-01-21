@@ -128,11 +128,11 @@ public class SDO_SplitGeomSegment extends UDF {
      *                     </ul>
      *                     null이거나 범위를 벗어난 경우 null 반환
      * @return 분할된 두 세그먼트를 포함하는 GeometryCollection의 WKB 바이트 배열.
-     *         <ul>
-     *           <li>요소[0]: 시작점 ~ 분할점 세그먼트</li>
-     *           <li>요소[1]: 분할점 ~ 끝점 세그먼트</li>
-     *         </ul>
-     *         입력이 null이거나 분할 지점이 유효하지 않은 경우 null 반환
+     * <ul>
+     *   <li>요소[0]: 시작점 ~ 분할점 세그먼트</li>
+     *   <li>요소[1]: 분할점 ~ 끝점 세그먼트</li>
+     * </ul>
+     * 입력이 null이거나 분할 지점이 유효하지 않은 경우 null 반환
      */
     public BytesWritable evaluate(BytesWritable geomBytes, Double splitMeasure) {
         // 바이트 배열을 JTS Geometry 객체로 변환

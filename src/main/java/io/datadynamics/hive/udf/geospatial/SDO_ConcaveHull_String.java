@@ -10,7 +10,7 @@ import org.locationtech.jts.geom.Geometry;
 public class SDO_ConcaveHull_String extends UDF {
 
     /**
-     * @param wkt 입력 기하학 객체 (WKT)
+     * @param wkt       입력 기하학 객체 (WKT)
      * @param tolerance 허용 오차 (JTS에서는 Edge Length Threshold로 해석)
      * @return Concave Hull Geometry (WKT)
      */

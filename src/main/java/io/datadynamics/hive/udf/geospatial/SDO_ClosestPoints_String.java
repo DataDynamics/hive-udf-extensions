@@ -185,12 +185,12 @@ public class SDO_ClosestPoints_String extends UDF {
      *             POINT, LINESTRING, POLYGON 등 모든 도형 타입 가능.
      *             null인 경우 null 반환
      * @return 두 도형의 최근접점을 연결하는 LINESTRING의 WKT 문자열.
-     *         <ul>
-     *           <li>정상: "LINESTRING (x1 y1, x2 y2)" 형식</li>
-     *           <li>입력이 null인 경우: null</li>
-     *           <li>WKT 파싱 실패: null</li>
-     *           <li>두 도형이 접촉: 길이 0인 LINESTRING (두 점이 동일)</li>
-     *         </ul>
+     * <ul>
+     *   <li>정상: "LINESTRING (x1 y1, x2 y2)" 형식</li>
+     *   <li>입력이 null인 경우: null</li>
+     *   <li>WKT 파싱 실패: null</li>
+     *   <li>두 도형이 접촉: 길이 0인 LINESTRING (두 점이 동일)</li>
+     * </ul>
      */
     public String evaluate(String wkt1, String wkt2) {
         // WKT 문자열을 JTS Geometry 객체로 변환

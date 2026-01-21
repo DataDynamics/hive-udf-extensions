@@ -110,8 +110,7 @@ public class SDO_Simplify extends UDF {
      *                  이 값은 좌표계의 단위(도 또는 미터)에 따라 해석됩니다.
      *                  양수 값이어야 하며, null인 경우 null을 반환합니다.
      * @return 단순화된 geometry의 직렬화된 바이트 배열
-     *         입력이 null이거나 유효하지 않은 경우 null을 반환합니다.
-     *
+     * 입력이 null이거나 유효하지 않은 경우 null을 반환합니다.
      * @see GeometryUtils#bytesToGeometry(BytesWritable) 바이트 배열을 Geometry로 변환
      * @see GeometryUtils#geometryToBytes(Geometry) Geometry를 바이트 배열로 변환
      * @see TopologyPreservingSimplifier#simplify(Geometry, double) 위상 보존 단순화 수행

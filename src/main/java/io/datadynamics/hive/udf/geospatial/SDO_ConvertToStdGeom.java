@@ -139,13 +139,13 @@ public class SDO_ConvertToStdGeom extends UDF {
      *                  XYZM 또는 XYM 차원의 좌표를 포함할 수 있음.
      *                  null인 경우 null 반환
      * @return M 차원이 제거된 표준 공간 객체의 WKB 바이트 배열.
-     *         <ul>
-     *           <li>입력이 null인 경우: null</li>
-     *           <li>XYZM → XYZ: M 값이 제거된 3D 도형</li>
-     *           <li>XYM → XY: M 값이 제거된 2D 도형</li>
-     *           <li>XYZ, XY: 변환 없이 그대로 반환</li>
-     *         </ul>
-     *         <p><b>현재:</b> 플레이스홀더로 입력을 그대로 반환</p>
+     * <ul>
+     *   <li>입력이 null인 경우: null</li>
+     *   <li>XYZM → XYZ: M 값이 제거된 3D 도형</li>
+     *   <li>XYM → XY: M 값이 제거된 2D 도형</li>
+     *   <li>XYZ, XY: 변환 없이 그대로 반환</li>
+     * </ul>
+     * <p><b>현재:</b> 플레이스홀더로 입력을 그대로 반환</p>
      */
     public BytesWritable evaluate(BytesWritable geomBytes) {
         // 바이트 배열을 JTS Geometry 객체로 변환
