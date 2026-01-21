@@ -8,7 +8,6 @@ import org.apache.hadoop.io.BytesWritable;
 import org.junit.Before;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
@@ -38,7 +37,7 @@ public class SDO_ConvertToStdGeomTest {
                 new GenericUDF.DeferredJavaObject(input)
         };
         BytesWritable result = (BytesWritable) udf.evaluate(args);
-        
+
         // 현재 구현은 입력을 그대로 반환하므로 동일한 객체(또는 동일한 내용)임을 확인
         assertNotNull(result);
         assertEquals(input, result);

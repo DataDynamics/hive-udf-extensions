@@ -151,7 +151,7 @@ public class SDO_ExtractTest {
         String wkt = "POINT (1 1)";
         Geometry geom = reader.read(wkt);
         BytesWritable inputWkb = GeometryUtils.geometryToBytes(geom);
-        
+
         GenericUDF.DeferredObject[] args = new GenericUDF.DeferredObject[]{
                 new GenericUDF.DeferredJavaObject(inputWkb),
                 new GenericUDF.DeferredJavaObject(1),

@@ -7,11 +7,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectIn
 import org.apache.hadoop.io.BytesWritable;
 import org.junit.Before;
 import org.junit.Test;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.*;
 
 import static org.junit.Assert.*;
 
@@ -51,10 +47,10 @@ public class SDO_AppendTest {
         Geometry result = GeometryUtils.bytesToGeometry(resultBytes);
         assertTrue(result instanceof GeometryCollection);
         assertEquals(2, result.getNumGeometries());
-        
+
         Geometry g1 = result.getGeometryN(0);
         Geometry g2 = result.getGeometryN(1);
-        
+
         assertEquals(1.0, g1.getCoordinate().x, 0.0001);
         assertEquals(1.0, g1.getCoordinate().y, 0.0001);
         assertEquals(2.0, g2.getCoordinate().x, 0.0001);
@@ -72,7 +68,7 @@ public class SDO_AppendTest {
         };
 
         BytesWritable resultBytes = (BytesWritable) udf.evaluate(deferredObjects);
-        
+
         assertSame(g2Bytes, resultBytes);
     }
 
@@ -87,7 +83,7 @@ public class SDO_AppendTest {
         };
 
         BytesWritable resultBytes = (BytesWritable) udf.evaluate(deferredObjects);
-        
+
         assertSame(g1Bytes, resultBytes);
     }
 

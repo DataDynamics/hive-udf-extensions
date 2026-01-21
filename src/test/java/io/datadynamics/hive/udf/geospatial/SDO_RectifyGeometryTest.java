@@ -7,7 +7,6 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectIn
 import org.apache.hadoop.io.BytesWritable;
 import org.junit.Before;
 import org.junit.Test;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
@@ -65,8 +64,8 @@ public class SDO_RectifyGeometryTest {
         Geometry resultGeom = GeometryUtils.bytesToGeometry(resultWkb);
         assertTrue(resultGeom.isValid());
         // 나비넥타이 모양은 buffer(0) 이후 두 개의 삼각형(MultiPolygon)이 됨
-        assertTrue(resultGeom.getGeometryType().equalsIgnoreCase("MultiPolygon") || 
-                   (resultGeom instanceof Polygon && resultGeom.isValid()));
+        assertTrue(resultGeom.getGeometryType().equalsIgnoreCase("MultiPolygon") ||
+                (resultGeom instanceof Polygon && resultGeom.isValid()));
     }
 
     @Test

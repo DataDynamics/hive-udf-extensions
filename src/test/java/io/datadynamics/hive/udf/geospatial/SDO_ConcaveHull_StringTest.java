@@ -32,12 +32,12 @@ public class SDO_ConcaveHull_StringTest {
     @Test
     public void testEvaluate_ValidInput() throws HiveException {
         // C 모양의 점 집합 생성 (Concave Hull이 Convex Hull과 다르게 생성되도록 함)
-        Coordinate[] coords = new Coordinate[] {
-            new Coordinate(0, 0),
-            new Coordinate(10, 0),
-            new Coordinate(10, 10),
-            new Coordinate(0, 10),
-            new Coordinate(2, 5) // 안쪽으로 들어간 점
+        Coordinate[] coords = new Coordinate[]{
+                new Coordinate(0, 0),
+                new Coordinate(10, 0),
+                new Coordinate(10, 10),
+                new Coordinate(0, 10),
+                new Coordinate(2, 5) // 안쪽으로 들어간 점
         };
         MultiPoint multiPoint = factory.createMultiPointFromCoords(coords);
         String inputWkt = GeometryUtils.geometryToString(multiPoint);
@@ -69,12 +69,12 @@ public class SDO_ConcaveHull_StringTest {
 
     @Test
     public void testEvaluate_NullTolerance() throws HiveException {
-        Coordinate[] coords = new Coordinate[] {
-            new Coordinate(0, 0),
-            new Coordinate(10, 0),
-            new Coordinate(10, 10),
-            new Coordinate(0, 10),
-            new Coordinate(5, 5)
+        Coordinate[] coords = new Coordinate[]{
+                new Coordinate(0, 0),
+                new Coordinate(10, 0),
+                new Coordinate(10, 10),
+                new Coordinate(0, 10),
+                new Coordinate(5, 5)
         };
         MultiPoint multiPoint = factory.createMultiPointFromCoords(coords);
         String inputWkt = GeometryUtils.geometryToString(multiPoint);

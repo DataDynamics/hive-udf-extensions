@@ -1,17 +1,17 @@
 package io.datadynamics.hive.udf.geospatial;
 
 import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.Collector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.apache.hadoop.hive.ql.udf.generic.Collector;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SDO_GetVerticesTest {
 
@@ -40,7 +40,7 @@ public class SDO_GetVerticesTest {
         udtf.process(new Object[]{wkt});
 
         assertEquals(3, results.size());
-        
+
         // Point 1
         assertEquals(1, results.get(0)[0]);
         assertEquals("0", results.get(0)[1]);

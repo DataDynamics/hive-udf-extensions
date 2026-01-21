@@ -48,12 +48,12 @@ public class GeometryUtilsTest {
     @Test
     public void testGeometryToBytes_ValidGeometry() {
         Point point = factory.createPoint(new Coordinate(30.0, 40.0));
-        
+
         BytesWritable result = GeometryUtils.geometryToBytes(point);
 
         assertNotNull(result);
         assertTrue(result.getLength() > 0);
-        
+
         // 원복 테스트
         Geometry reversed = GeometryUtils.bytesToGeometry(result);
         assertNotNull(reversed);
@@ -65,15 +65,15 @@ public class GeometryUtilsTest {
     public void testGeometryToBytes_Null() {
         assertNull(GeometryUtils.geometryToBytes(null));
     }
-    
+
     @Test
     public void testGeometryToBytes_3DGeometry() {
         // GeometryUtils에서 WKBWriter(3, true)를 사용하므로 3D 좌표 보존 여부 확인
         Point point = factory.createPoint(new Coordinate(10.0, 20.0, 30.0));
-        
+
         BytesWritable result = GeometryUtils.geometryToBytes(point);
         assertNotNull(result);
-        
+
         Geometry reversed = GeometryUtils.bytesToGeometry(result);
         assertNotNull(reversed);
         assertEquals(10.0, reversed.getCoordinate().x, 0.0001);
