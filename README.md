@@ -56,10 +56,10 @@ select array_shuffle(array(16,12,18,9))
 HDFS에 UDF JAR 파일을 다음과 같이 업로드합니다. 해당 JAR 파일은 `hive` 계정이 접근할 수 있는 권한이 있어야 합니다.
 
 ```
-hdfs dfs -mkdir hdfs://<NN>/data/raw/system/lib-ext/
-hdfs dfs -chmod 755 hdfs://<NN>/data/raw/system/lib-ext/
-hdfs dfs -put hive-udf-extensions-1.0.0.jar hdfs://<NN>/data/raw/system/lib-ext/
-hdfs dfs -chmod 755 hdfs://<NN>/data/raw/system/lib-ext/hive-udf-extensions-1.0.0.jar
+hdfs dfs -mkdir hdfs://<NN>/lib-ext/
+hdfs dfs -chmod 755 hdfs://<NN>/lib-ext/
+hdfs dfs -put hive-udf-extensions-1.0.0.jar hdfs://<NN>/lib-ext/
+hdfs dfs -chmod 755 hdfs://<NN>/lib-ext/hive-udf-extensions-1.0.0.jar
 ```
 
 ```sql
