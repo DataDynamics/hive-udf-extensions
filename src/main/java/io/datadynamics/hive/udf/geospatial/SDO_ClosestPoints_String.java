@@ -28,7 +28,7 @@ import org.locationtech.jts.operation.distance.DistanceOp;
  *       ┌────────┐                    ┌────────┐
  *       │        │                    │        │
  *       │    A   │ P1 ●────────● P2   │    B   │
- *       │        │      최단거리       │        │
+ *       │        │      최단거리      │        │
  *       └────────┘                    └────────┘
  *
  *   결과: LINESTRING(P1.x P1.y, P2.x P2.y)
