@@ -230,3 +230,67 @@ Impala는 ST_Envelope를 통해 MBR을 구하며, 좌표 추출은 별도 함수
 |VALIDATE_GEOMETRY_...|ST_IsValid|ST_IsValidReason|오류 사유까지 상세 확인 가능|
 |SDO_UTIL.GETVERTICES|❌ 지원 불가|ST_DumpPoints|모든 꼭짓점을 개별 포인트로 전개|
 |SDO_RELATE|ST_Intersects 등|ST_Intersects, ST_Within 등|표준 위상 관계 함수로 대체|
+
+## 참고
+
+### Apache Impala의 UDF
+
+* UDF, UDAF만 지원
+* Native Impala UDF 지원 (C++로 구현) - C++로 구현한 UDF는 일반적으로 Java 버전 대비 10배 이상 빠름
+* Hive UDF with Impala 지원
+  *  `org.apache.hadoop.hive.ql.exec.UDF` 반드시 상속해야 함
+  * Timestamp의 리턴은 지원하지 ㅇ낳음
+  * UDAF, UDTF는 지원하지 않음
+  * 스칼라 데이터 타입을 사용하도록 함
+
+다음은 Java UDF를 Impala에서 사용하는 방법입니다.
+
+```
+[localhost:21000] > create database udfs;
+[localhost:21000] > use udfs;
+localhost:21000] > create function lower(string) returns string location '/user/hive/udfs/hive.jar' symbol='org.apache.hadoop.hive.ql.udf.UDFLower';
+ERROR: AnalysisException: Function cannot have the same name as a builtin: lower
+[localhost:21000] > create function my_lower(string) returns string location '/user/hive/udfs/hive.jar' symbol='org.apache.hadoop.hive.ql.udf.UDFLower';
+[localhost:21000] > select my_lower('Some String NOT ALREADY LOWERCASE');
++----------------------------------------------------+
+| udfs.my_lower('some string not already lowercase') |
++----------------------------------------------------+
+| some string not already lowercase                  |
++----------------------------------------------------+
+Returned 1 row(s) in 0.11s
+[localhost:21000] > create table t2 (s string);
+[localhost:21000] > insert into t2 values ('lower'),('UPPER'),('Init cap'),('CamelCase');
+Inserted 4 rows in 2.28s
+[localhost:21000] > select * from t2;
++-----------+
+| s         |
++-----------+
+| lower     |
+| UPPER     |
+| Init cap  |
+| CamelCase |
++-----------+
+Returned 4 row(s) in 0.47s
+[localhost:21000] > select my_lower(s) from t2;
++------------------+
+| udfs.my_lower(s) |
++------------------+
+| lower            |
+| upper            |
+| init cap         |
+| camelcase        |
++------------------+
+Returned 4 row(s) in 0.54s
+[localhost:21000] > select my_lower(concat('ABC ',s,' XYZ')) from t2;
++------------------------------------------+
+| udfs.my_lower(concat('abc ', s, ' xyz')) |
++------------------------------------------+
+| abc lower xyz                            |
+| abc upper xyz                            |
+| abc init cap xyz                         |
+| abc camelcase xyz                        |
++------------------------------------------+
+Returned 4 row(s) in 0.22s
+```
+
+Impala UDF에 대한 자세한 사항은 https://impala.apache.org/docs/build/html/topics/impala_udf.html 을 참고하십시오.
