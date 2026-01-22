@@ -6,7 +6,7 @@ import com.esri.core.geometry.SpatialReference;
 import com.esri.core.geometry.ogc.OGCGeometry;
 import com.esri.core.geometry.ogc.OGCLineString;
 import com.esri.core.geometry.ogc.OGCPoint;
-import io.datadynamics.hive.udf.esri.GeometryUtils;
+import io.datadynamics.hive.udf.esri.hive.GeometryUtils;
 import io.datadynamics.hive.udf.utils.PrettyHexDump;
 import org.apache.hadoop.io.BytesWritable;
 import org.junit.Before;
