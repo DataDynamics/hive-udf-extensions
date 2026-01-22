@@ -19,7 +19,7 @@ Coordinates for geometries may be 2D (x, y), 3D (x, y, z) or 4D (x, y, z, m). Ge
 - If geospatial functionality is not needed, it can be turned off by setting GEOSPATIAL_LIBRARY to NONE.
 ```
 
-Apache Impala의 GeoSpatial Function은 Hive ESRI(https://github.com/Esri/spatial-framework-for-hadoop/wiki/UDF-Documentation)을 기반으로 하고 있습니다.
+Apache Impala의 GeoSpatial Function은 Hive ESRI(https://github.com/Esri/spatial-framework-for-hadoop/wiki/UDF-Documentation)을 기반으로 하고 있으며 native하고 C++로 구현되어 있습니다.
 
 ## Use
 
