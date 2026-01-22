@@ -5,6 +5,10 @@
 * Hive 3.1.3
 * JDK 11 이상
 
+## Cloudera CDP
+
+Cloudera CDP의 Impala에서 GeoSpatial 기능을 활성화 하기 위해서 Coordinator, Executor 설정에 `geospatial_library=HIVE_ESRI`을 추가하도록 합니다.
+
 ## Use
 
 ### Temporary Use
