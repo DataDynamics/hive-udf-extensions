@@ -239,11 +239,11 @@ Impala는 ST_Envelope를 통해 MBR을 구하며, 좌표 추출은 별도 함수
 * Native Impala UDF 지원 (C++로 구현) - C++로 구현한 UDF는 일반적으로 Java 버전 대비 10배 이상 빠름
 * Hive UDF with Impala 지원
   *  `org.apache.hadoop.hive.ql.exec.UDF` 반드시 상속해야 함
-  * Timestamp의 리턴은 지원하지 ㅇ낳음
+  * Timestamp의 리턴은 지원하지 않음
   * UDAF, UDTF는 지원하지 않음
   * 스칼라 데이터 타입을 사용하도록 함
 
-다음은 Java UDF를 Impala에서 사용하는 방법입니다.
+다음은 Java UDF를 Impala에서 사용하는 방법입니다. Impala에서 Hive UDF를 사용하려면 HDFS에 Jar 파일을 업로드한 후에 사용해야 하며, 함수의 signature를 명시적으로 지정해야 합니다.
 
 ```
 [localhost:21000] > create database udfs;
