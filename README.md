@@ -7,7 +7,19 @@
 
 ## Cloudera CDP
 
-Cloudera CDP의 Impala에서 GeoSpatial 기능을 활성화 하기 위해서 Coordinator, Executor 설정에 `geospatial_library=HIVE_ESRI`을 추가하도록 합니다.
+Cloudera CDP의 Impala에서 GeoSpatial 기능을 활성화 하기 위해서 Coordinator, Executor의 starup flag 설정에 `--GEOSPATIAL_LIBRARY=HIVE_ESRI`을 추가하도록 합니다.
+
+Cloudera CDP의 GeoSpatial 지원은 https://impala.apache.org/docs/build/html/topics/impala_geospatial_functions.html 을 참고하십시오.
+
+Apache Impala의 documentation에 다음과 같이 기술되어 있습니다.
+
+```
+Coordinates for geometries may be 2D (x, y), 3D (x, y, z) or 4D (x, y, z, m). Geospatial functionality can be controlled through the startup flag GEOSPATIAL_LIBRARY.
+- By default, the library is set to HIVE_ESRI, enabling the Hive ESRI geospatial functions.
+- If geospatial functionality is not needed, it can be turned off by setting GEOSPATIAL_LIBRARY to NONE.
+```
+
+Apache Impala의 GeoSpatial Function은 Hive ESRI(https://github.com/Esri/spatial-framework-for-hadoop/wiki/UDF-Documentation)을 기반으로 하고 있습니다.
 
 ## Use
 
