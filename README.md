@@ -106,6 +106,41 @@ CREATE TEMPORARY MACRO try_date(s STRING)
 
 # Impala GeoSpatial Functions for Oracle GeoSpatial Functions
 
+spatial function 을 hive 에 등록하기 위해 아래 esri repository 에서 hive udf 가 들어있는 jar file 을 download 한 후에 udf 를 추가합니다.
+
+https://github.com/Esri/spatial-framework-for-hadoop/releases
+
+```shell
+wget https://github.com/Esri/spatial-framework-for-hadoop/releases/download/v2.2.0/spatial-sdk-hive-2.2.0.jar
+hdfs dfs -put spatial-sdk-hive-2.2.0.jar </path/to/jars>
+
+impala-shell -i <impala-daemon.host.local>
+```
+
+```sql
+DROP FUNCTION IF EXISTS ST_AsText(BINARY);
+DROP FUNCTION IF EXISTS ST_GeomFromText(STRING);
+-- ... 그 외 필요한 함수들
+CREATE FUNCTION ST_AsText(BINARY) RETURNS STRING LOCATION '/path/to/jars/spatial-sdk-hive-2.2.0.jar' SYMBOL='com.esri.hadoop.hive.ST_AsText';
+CREATE FUNCTION ST_GeomFromText(STRING) RETURNS BINARY LOCATION '/path/to/jars/spatial-sdk-hive-2.2.0.jar' SYMBOL='com.esri.hadoop.hive.ST_GeomFromText';
+-- ... 그 외 필요한 함수들
+select ST_AsText(ST_GeomFromText('LINESTRING(0 0, 1 1)')) as line_string;
+```
+
+```text
+[hdw1.dd.io:21050] default> select ST_AsText(ST_GeomFromText('LINESTRING(0 0, 1 1)')) as line_string;
+Query: select ST_AsText(ST_GeomFromText('LINESTRING(0 0, 1 1)')) as line_string
+Query submitted at: 2026-01-22 22:55:33 (Coordinator: http://hdw1.dd.io:25000)
+Query state can be monitored at: http://hdw1.dd.io:25000/query_plan?query_id=1f4a90c47e7d5e15:442a9b9900000000
++-----------------------+
+| line_string           |
++-----------------------+
+| LINESTRING (0 0, 1 1) |
++-----------------------+
+Fetched 1 row(s) in 0.12s
+[hdw1.dd.io:21050] default> 
+```
+
 ## Oracle to Impala Mapping
 
 ### 1:1 대응 또는 유사한 표준 함수
