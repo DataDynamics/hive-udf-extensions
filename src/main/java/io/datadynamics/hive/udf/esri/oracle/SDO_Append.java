@@ -6,7 +6,6 @@ import com.esri.core.geometry.ogc.OGCMultiLineString;
 import io.datadynamics.hive.udf.esri.GeometryUtils;
 import io.datadynamics.hive.udf.esri.LogUtils;
 import io.datadynamics.hive.udf.esri.ST_GeometryAccessor;
-import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
 import org.apache.hadoop.io.BytesWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +21,6 @@ import org.slf4j.LoggerFactory;
 public class SDO_Append extends ST_GeometryAccessor {
 
     static final Logger LOG = LoggerFactory.getLogger(SDO_Append.class.getName());
-
-    private transient BinaryObjectInspector g1OI;
-    private transient BinaryObjectInspector g2OI;
 
     /**
      * 두 개의 ESRI Shape 형식의 기하학 데이터를 입력받아 결합된 MultiLineString을 반환합니다.
