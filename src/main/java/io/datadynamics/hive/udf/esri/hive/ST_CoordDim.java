@@ -25,10 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_CoordDim",
-    value = "_FUNC_(geometry) - return count of coordinate components",
-    extended = "Example:\n" + "  > SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1;  -- 2\n"
-        + "  > SELECT _FUNC_(ST_PointZ(1.5,2.5, 3) FROM src LIMIT 1;  -- 3\n"
-        + "  > SELECT _FUNC_(ST_Point(1.5, 2.5, 3., 4.)) FROM src LIMIT 1;  -- 4\n")
+        value = "_FUNC_(geometry) - return count of coordinate components",
+        extended = "Example:\n" + "  > SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1;  -- 2\n"
+                + "  > SELECT _FUNC_(ST_PointZ(1.5,2.5, 3) FROM src LIMIT 1;  -- 3\n"
+                + "  > SELECT _FUNC_(ST_Point(1.5, 2.5, 3., 4.)) FROM src LIMIT 1;  -- 4\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -51,22 +51,22 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_CoordDim extends ST_GeometryAccessor {
-  final IntWritable resultInt = new IntWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_Is3D.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_Is3D.class.getName());
+    final IntWritable resultInt = new IntWritable();
 
-  public IntWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    public IntWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            return null;
+        }
+
+        resultInt.set(ogcGeometry.coordinateDimension());
+        return resultInt;
     }
-
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      return null;
-    }
-
-    resultInt.set(ogcGeometry.coordinateDimension());
-    return resultInt;
-  }
 
 }

@@ -26,12 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_Envelope",
-    value = "_FUNC_(ST_Geometry) - the envelope of the ST_Geometry",
-    extended = "Example:\n"
-        + "SELECT _FUNC_(ST_LineString(0,0, 2,2)) from src LIMIT 1;  -- POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))\n"
-        + "SELECT _FUNC_(ST_Polygon(2,0, 2,3, 3,0)) from src LIMIT 1;  -- POLYGON ((2 0, 3 0, 3 3, 2 3, 2 0))\n"
-        + "OGC Compliance Notes : \n" + " In the case of a point or a vertical or horizontal line,"
-        + " ST_Envelope may either apply a tolerance or return an empty envelope.")
+        value = "_FUNC_(ST_Geometry) - the envelope of the ST_Geometry",
+        extended = "Example:\n"
+                + "SELECT _FUNC_(ST_LineString(0,0, 2,2)) from src LIMIT 1;  -- POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))\n"
+                + "SELECT _FUNC_(ST_Polygon(2,0, 2,3, 3,0)) from src LIMIT 1;  -- POLYGON ((2 0, 3 0, 3 3, 2 3, 2 0))\n"
+                + "OGC Compliance Notes : \n" + " In the case of a point or a vertical or horizontal line,"
+                + " ST_Envelope may either apply a tolerance or return an empty envelope.")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -50,29 +50,29 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_Envelope extends ST_GeometryProcessing {
-  static final Logger LOG = LoggerFactory.getLogger(ST_Envelope.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_Envelope.class.getName());
 
-  public BytesWritable evaluate(BytesWritable geometryref) {
-    if (geometryref == null || geometryref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+    public BytesWritable evaluate(BytesWritable geometryref) {
+        if (geometryref == null || geometryref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geometryref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geometryref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    int wkid = GeometryUtils.getWKID(geometryref);
-    SpatialReference spatialReference = null;
-    if (wkid != GeometryUtils.WKID_UNKNOWN) {
-      spatialReference = SpatialReference.create(wkid);
+        int wkid = GeometryUtils.getWKID(geometryref);
+        SpatialReference spatialReference = null;
+        if (wkid != GeometryUtils.WKID_UNKNOWN) {
+            spatialReference = SpatialReference.create(wkid);
+        }
+        Envelope envBound = new Envelope();
+        ogcGeometry.getEsriGeometry().queryEnvelope(envBound);
+        return GeometryUtils
+                .geometryToEsriShapeBytesWritable(OGCGeometry.createFromEsriGeometry(envBound, spatialReference));
     }
-    Envelope envBound = new Envelope();
-    ogcGeometry.getEsriGeometry().queryEnvelope(envBound);
-    return GeometryUtils
-        .geometryToEsriShapeBytesWritable(OGCGeometry.createFromEsriGeometry(envBound, spatialReference));
-  }
 
 }

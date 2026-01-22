@@ -26,8 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_Z",
-    value = "_FUNC_(point) - returns the Z coordinate of point",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1;  --  1.5")
+        value = "_FUNC_(point) - returns the Z coordinate of point",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1;  --  1.5")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -54,33 +54,33 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_Z extends ST_GeometryAccessor {
-  final DoubleWritable resultDouble = new DoubleWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_Z.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_Z.class.getName());
+    final DoubleWritable resultDouble = new DoubleWritable();
 
-  public DoubleWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+    public DoubleWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      return null;
-    }
-    if (!ogcGeometry.is3D()) {
-      LogUtils.Log_Not3D(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            return null;
+        }
+        if (!ogcGeometry.is3D()) {
+            LogUtils.Log_Not3D(LOG);
+            return null;
+        }
 
-    switch (GeometryUtils.getType(geomref)) {
-    case ST_POINT:
-      OGCPoint pt = (OGCPoint) ogcGeometry;
-      resultDouble.set(pt.Z());
-      return resultDouble;
-    default:
-      LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_POINT, GeometryUtils.getType(geomref));
-      return null;
+        switch (GeometryUtils.getType(geomref)) {
+            case ST_POINT:
+                OGCPoint pt = (OGCPoint) ogcGeometry;
+                resultDouble.set(pt.Z());
+                return resultDouble;
+            default:
+                LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_POINT, GeometryUtils.getType(geomref));
+                return null;
+        }
     }
-  }
 
 }

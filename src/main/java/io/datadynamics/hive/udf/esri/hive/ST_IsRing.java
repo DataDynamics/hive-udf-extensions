@@ -26,10 +26,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_IsRing",
-    value = "_FUNC_(ST_LineString) - return true if the linestring is closed & simple",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_LineString(0.,0., 3.,4., 0.,4., 0.,0.)) FROM src LIMIT 1;  -- true\n"
-        + "  SELECT _FUNC_(ST_LineString(0.,0., 1.,1., 1.,2., 2.,1., 1.,1., 0.,0.)) FROM src LIMIT 1;  -- false\n"
-        + "  SELECT _FUNC_(ST_LineString(0.,0., 3.,4.)) FROM src LIMIT 1;  -- false\n")
+        value = "_FUNC_(ST_LineString) - return true if the linestring is closed & simple",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_LineString(0.,0., 3.,4., 0.,4., 0.,0.)) FROM src LIMIT 1;  -- true\n"
+                + "  SELECT _FUNC_(ST_LineString(0.,0., 1.,1., 1.,2., 2.,1., 1.,1., 0.,0.)) FROM src LIMIT 1;  -- false\n"
+                + "  SELECT _FUNC_(ST_LineString(0.,0., 3.,4.)) FROM src LIMIT 1;  -- false\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -52,37 +52,37 @@ import org.slf4j.LoggerFactory;
 //	)
 
 public class ST_IsRing extends ST_GeometryAccessor {
-  final BooleanWritable resultBoolean = new BooleanWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_IsRing.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_IsRing.class.getName());
+    final BooleanWritable resultBoolean = new BooleanWritable();
 
-  public BooleanWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    public BooleanWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        try {
+
+            switch (GeometryUtils.getType(geomref)) {
+                case ST_LINESTRING:
+                    OGCLineString lns = (OGCLineString) ogcGeometry;
+                    resultBoolean.set(lns.isClosed() && lns.isSimple());
+                    return resultBoolean;
+                default:  // ST_IsRing gives ERROR on Point, Polygon, or MultiLineString - on Postgres
+                    LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_LINESTRING, GeometryUtils.getType(geomref));
+                    return null;
+            }
+
+        } catch (Exception e) {
+            LogUtils.Log_InternalError(LOG, "ST_IsRing" + e);
+            return null;
+        }
     }
-
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-
-    try {
-
-      switch (GeometryUtils.getType(geomref)) {
-      case ST_LINESTRING:
-        OGCLineString lns = (OGCLineString) ogcGeometry;
-        resultBoolean.set(lns.isClosed() && lns.isSimple());
-        return resultBoolean;
-      default:  // ST_IsRing gives ERROR on Point, Polygon, or MultiLineString - on Postgres
-        LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_LINESTRING, GeometryUtils.getType(geomref));
-        return null;
-      }
-
-    } catch (Exception e) {
-      LogUtils.Log_InternalError(LOG, "ST_IsRing" + e);
-      return null;
-    }
-  }
 
 }

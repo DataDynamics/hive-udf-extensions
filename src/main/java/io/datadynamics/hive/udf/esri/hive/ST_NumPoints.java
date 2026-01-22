@@ -29,10 +29,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_NumPoints",
-    value = "_FUNC_(geometry) - return the number of points in the geometry",
-    extended = "Example:\n" + "  > SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1;  -- 1\n"
-        + "  > SELECT _FUNC_(ST_LineString(1.5,2.5, 3.0,2.2)) FROM src LIMIT 1;  -- 2\n"
-        + "  > SELECT _FUNC_(ST_GeomFromText('polygon ((0 0, 10 0, 0 10, 0 0))')) FROM src LIMIT 1;  -- 4\n")
+        value = "_FUNC_(geometry) - return the number of points in the geometry",
+        extended = "Example:\n" + "  > SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1;  -- 1\n"
+                + "  > SELECT _FUNC_(ST_LineString(1.5,2.5, 3.0,2.2)) FROM src LIMIT 1;  -- 2\n"
+                + "  > SELECT _FUNC_(ST_GeomFromText('polygon ((0 0, 10 0, 0 10, 0 0))')) FROM src LIMIT 1;  -- 4\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -63,37 +63,37 @@ import org.slf4j.LoggerFactory;
 //	)
 
 public class ST_NumPoints extends ST_GeometryAccessor {
-  final IntWritable resultInt = new IntWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_IsClosed.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_IsClosed.class.getName());
+    final IntWritable resultInt = new IntWritable();
 
-  public IntWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+    public IntWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    Geometry esriGeom = ogcGeometry.getEsriGeometry();
-    switch (esriGeom.getType()) {
-    case Point:
-      resultInt.set(esriGeom.isEmpty() ? 0 : 1);
-      break;
-    case MultiPoint:
-      resultInt.set(((MultiPoint) (esriGeom)).getPointCount());
-      break;
-    case Polygon:
-      Polygon polygon = (Polygon) (esriGeom);
-      resultInt.set(polygon.getPointCount() + polygon.getPathCount());
-      break;
-    default:
-      resultInt.set(((MultiPath) (esriGeom)).getPointCount());
-      break;
+        Geometry esriGeom = ogcGeometry.getEsriGeometry();
+        switch (esriGeom.getType()) {
+            case Point:
+                resultInt.set(esriGeom.isEmpty() ? 0 : 1);
+                break;
+            case MultiPoint:
+                resultInt.set(((MultiPoint) (esriGeom)).getPointCount());
+                break;
+            case Polygon:
+                Polygon polygon = (Polygon) (esriGeom);
+                resultInt.set(polygon.getPointCount() + polygon.getPathCount());
+                break;
+            default:
+                resultInt.set(((MultiPath) (esriGeom)).getPointCount());
+                break;
+        }
+        return resultInt;
     }
-    return resultInt;
-  }
 }

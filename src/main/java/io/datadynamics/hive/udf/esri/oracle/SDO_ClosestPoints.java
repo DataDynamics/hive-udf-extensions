@@ -144,7 +144,7 @@ public class SDO_ClosestPoints extends ST_GeometryAccessor {
             // OGCGeometry (ESRI) -> WKB -> JTS Geometry 변환
             // JTS의 DistanceOp를 사용하기 위해 JTS 객체로 변환이 필요함
             WKBReader reader = new WKBReader();
-            
+
             // 첫 번째 지오메트리 변환
             ByteBuffer wkb1 = ogcGeom1.asBinary();
             byte[] bytes1 = new byte[wkb1.remaining()];
@@ -172,7 +172,7 @@ public class SDO_ClosestPoints extends ST_GeometryAccessor {
             WKBWriter writer = new WKBWriter();
             byte[] resultWkb = writer.write(resultLine);
             OGCGeometry ogcResult = OGCGeometry.fromBinary(ByteBuffer.wrap(resultWkb));
-            
+
             // 원본의 공간 참조(SRID)를 결과에 설정
             ogcResult.setSpatialReference(ogcGeom1.esriSR);
 

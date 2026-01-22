@@ -27,9 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_AsJSON",
-    value = "_FUNC_(ST_Geometry) - return JSON representation of ST_Geometry\n",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(1.0, 2.0)) from onerow; -- {\"x\":1.0,\"y\":2.0}\n"
-        + "  SELECT _FUNC_(ST_SetSRID(ST_Point(1, 1), 4326)) from onerow; -- {\"x\":1.0,\"y\":1.0,\"spatialReference\":{\"wkid\":4326}}")
+        value = "_FUNC_(ST_Geometry) - return JSON representation of ST_Geometry\n",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(1.0, 2.0)) from onerow; -- {\"x\":1.0,\"y\":2.0}\n"
+                + "  SELECT _FUNC_(ST_SetSRID(ST_Point(1, 1), 4326)) from onerow; -- {\"x\":1.0,\"y\":1.0,\"spatialReference\":{\"wkid\":4326}}")
 //@HivePdkUnitTests(
 //	cases = { 
 //		@HivePdkUnitTest(
@@ -47,22 +47,22 @@ import org.slf4j.LoggerFactory;
 //		}
 //	)
 public class ST_AsJson extends ST_Geometry {
-  static final Logger LOG = LoggerFactory.getLogger(ST_AsJson.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_AsJson.class.getName());
 
-  public Text evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    public Text evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        Geometry esriGeom = ogcGeometry.getEsriGeometry();
+        int wkid = GeometryUtils.getWKID(geomref);
+        return new Text(GeometryEngine.geometryToJson(wkid, esriGeom));
     }
-
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-
-    Geometry esriGeom = ogcGeometry.getEsriGeometry();
-    int wkid = GeometryUtils.getWKID(geomref);
-    return new Text(GeometryEngine.geometryToJson(wkid, esriGeom));
-  }
 }

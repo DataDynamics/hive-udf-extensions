@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 
 @Description(name = "ST_AsBinary",
-    value = "_FUNC_(ST_Geometry) - return Well-Known Binary (WKB) representation of geometry\n",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(1, 2)) FROM onerow; -- WKB representation of POINT (1 2)\n")
+        value = "_FUNC_(ST_Geometry) - return Well-Known Binary (WKB) representation of geometry\n",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(1, 2)) FROM onerow; -- WKB representation of POINT (1 2)\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -39,27 +39,27 @@ import java.nio.ByteBuffer;
 
 public class ST_AsBinary extends ST_Geometry {
 
-  static final Logger LOG = LoggerFactory.getLogger(ST_AsBinary.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_AsBinary.class.getName());
 
-  public BytesWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+    public BytesWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    try {
-      ByteBuffer byteBuf = ogcGeometry.asBinary();
-      byte[] byteArr = byteBuf.array();
-      return new BytesWritable(byteArr);
-    } catch (Exception e) {
-      LOG.error(e.getMessage());
-      return null;
+        try {
+            ByteBuffer byteBuf = ogcGeometry.asBinary();
+            byte[] byteArr = byteBuf.array();
+            return new BytesWritable(byteArr);
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            return null;
+        }
     }
-  }
 }

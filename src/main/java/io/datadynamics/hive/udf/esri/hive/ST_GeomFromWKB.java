@@ -28,10 +28,10 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 
 @Description(name = "ST_GeomFromWKB",
-    value = "_FUNC_(wkb) - construct an ST_Geometry from OGC well-known binary",
-    extended = "Example:\n"
-        + "  SELECT _FUNC_(ST_AsBinary(ST_GeomFromText('linestring (1 0, 2 3)'))) FROM src LIMIT 1;  -- constructs ST_Linestring\n"
-        + "  SELECT _FUNC_(ST_AsBinary(ST_GeomFromText('multipoint ((1 0), (2 3))'))) FROM src LIMIT 1;  -- constructs ST_MultiPoint\n")
+        value = "_FUNC_(wkb) - construct an ST_Geometry from OGC well-known binary",
+        extended = "Example:\n"
+                + "  SELECT _FUNC_(ST_AsBinary(ST_GeomFromText('linestring (1 0, 2 3)'))) FROM src LIMIT 1;  -- constructs ST_Linestring\n"
+                + "  SELECT _FUNC_(ST_AsBinary(ST_GeomFromText('multipoint ((1 0), (2 3))'))) FROM src LIMIT 1;  -- constructs ST_MultiPoint\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -67,29 +67,29 @@ import java.nio.ByteBuffer;
 
 public class ST_GeomFromWKB extends ST_Geometry {
 
-  static final Logger LOG = LoggerFactory.getLogger(ST_GeomFromWKB.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_GeomFromWKB.class.getName());
 
-  public BytesWritable evaluate(BytesWritable wkb) throws UDFArgumentException {
-    return evaluate(wkb, 0);
-  }
-
-  public BytesWritable evaluate(BytesWritable wkb, int wkid) throws UDFArgumentException {
-
-    try {
-      SpatialReference spatialReference = null;
-      if (wkid != GeometryUtils.WKID_UNKNOWN) {
-        spatialReference = SpatialReference.create(wkid);
-      }
-      byte[] byteArr = wkb.getBytes();
-      ByteBuffer byteBuf = ByteBuffer.allocate(byteArr.length);
-      byteBuf.put(byteArr);
-      OGCGeometry ogcObj = OGCGeometry.fromBinary(byteBuf);
-      ogcObj.setSpatialReference(spatialReference);
-      return GeometryUtils.geometryToEsriShapeBytesWritable(ogcObj);
-    } catch (Exception e) {  // IllegalArgumentException, GeometryException
-      LOG.error(e.getMessage());
-      return null;
+    public BytesWritable evaluate(BytesWritable wkb) throws UDFArgumentException {
+        return evaluate(wkb, 0);
     }
-  }
+
+    public BytesWritable evaluate(BytesWritable wkb, int wkid) throws UDFArgumentException {
+
+        try {
+            SpatialReference spatialReference = null;
+            if (wkid != GeometryUtils.WKID_UNKNOWN) {
+                spatialReference = SpatialReference.create(wkid);
+            }
+            byte[] byteArr = wkb.getBytes();
+            ByteBuffer byteBuf = ByteBuffer.allocate(byteArr.length);
+            byteBuf.put(byteArr);
+            OGCGeometry ogcObj = OGCGeometry.fromBinary(byteBuf);
+            ogcObj.setSpatialReference(spatialReference);
+            return GeometryUtils.geometryToEsriShapeBytesWritable(ogcObj);
+        } catch (Exception e) {  // IllegalArgumentException, GeometryException
+            LOG.error(e.getMessage());
+            return null;
+        }
+    }
 
 }

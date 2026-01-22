@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_Distance",
-    value = "_FUNC_(ST_Geometry1, ST_Geometry2) - returns the distance between 2 ST_Geometry objects",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(0.0,0.0), ST_Point(3.0,4.0)) FROM src LIMIT 1;  --  5.0")
+        value = "_FUNC_(ST_Geometry1, ST_Geometry2) - returns the distance between 2 ST_Geometry objects",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(0.0,0.0), ST_Point(3.0,4.0)) FROM src LIMIT 1;  --  5.0")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -45,34 +45,34 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_Distance extends ST_GeometryAccessor {
-  final DoubleWritable resultDouble = new DoubleWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_Distance.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_Distance.class.getName());
+    final DoubleWritable resultDouble = new DoubleWritable();
 
-  public DoubleWritable evaluate(BytesWritable geometryref1, BytesWritable geometryref2) {
-    if (geometryref1 == null || geometryref2 == null || geometryref1.getLength() == 0
-        || geometryref2.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-    if (!GeometryUtils.compareSpatialReferences(geometryref1, geometryref2)) {
-      LogUtils.Log_SRIDMismatch(LOG, geometryref1, geometryref2);
-      return null;
-    }
+    public DoubleWritable evaluate(BytesWritable geometryref1, BytesWritable geometryref2) {
+        if (geometryref1 == null || geometryref2 == null || geometryref1.getLength() == 0
+                || geometryref2.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+        if (!GeometryUtils.compareSpatialReferences(geometryref1, geometryref2)) {
+            LogUtils.Log_SRIDMismatch(LOG, geometryref1, geometryref2);
+            return null;
+        }
 
-    OGCGeometry ogcGeom1 = GeometryUtils.geometryFromEsriShape(geometryref1);
-    OGCGeometry ogcGeom2 = GeometryUtils.geometryFromEsriShape(geometryref2);
-    if (ogcGeom1 == null || ogcGeom2 == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeom1 = GeometryUtils.geometryFromEsriShape(geometryref1);
+        OGCGeometry ogcGeom2 = GeometryUtils.geometryFromEsriShape(geometryref2);
+        if (ogcGeom1 == null || ogcGeom2 == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    try {
-      resultDouble.set(ogcGeom1.distance(ogcGeom2));
-      return resultDouble;
-    } catch (Exception e) {
-      LogUtils.Log_InternalError(LOG, "ST_Distance: " + e);
-      return null;
-    }
+        try {
+            resultDouble.set(ogcGeom1.distance(ogcGeom2));
+            return resultDouble;
+        } catch (Exception e) {
+            LogUtils.Log_InternalError(LOG, "ST_Distance: " + e);
+            return null;
+        }
 
-  }
+    }
 }

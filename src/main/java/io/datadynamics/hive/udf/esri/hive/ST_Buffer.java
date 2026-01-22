@@ -25,26 +25,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_Buffer",
-    value = "_FUNC_(ST_Geometry, distance) - ST_Geometry buffered by distance",
-    extended = "Example:\n"
-        + "  SELECT _FUNC_(ST_Point(0, 0), 1) FROM src LIMIT 1;   -- polygon approximating a unit circle\n") public class ST_Buffer
-    extends ST_GeometryProcessing {
+        value = "_FUNC_(ST_Geometry, distance) - ST_Geometry buffered by distance",
+        extended = "Example:\n"
+                + "  SELECT _FUNC_(ST_Point(0, 0), 1) FROM src LIMIT 1;   -- polygon approximating a unit circle\n")
+public class ST_Buffer
+        extends ST_GeometryProcessing {
 
-  static final Logger LOG = LoggerFactory.getLogger(ST_Buffer.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_Buffer.class.getName());
 
-  public BytesWritable evaluate(BytesWritable geometryref1, DoubleWritable distance) {
-    if (geometryref1 == null || geometryref1.getLength() == 0 || distance == null) {
-      return null;
+    public BytesWritable evaluate(BytesWritable geometryref1, DoubleWritable distance) {
+        if (geometryref1 == null || geometryref1.getLength() == 0 || distance == null) {
+            return null;
+        }
+
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geometryref1);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        OGCGeometry bufferedGeometry = ogcGeometry.buffer(distance.get());
+        // TODO persist type information (polygon vs multipolygon)
+        return GeometryUtils.geometryToEsriShapeBytesWritable(bufferedGeometry);
     }
-
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geometryref1);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-
-    OGCGeometry bufferedGeometry = ogcGeometry.buffer(distance.get());
-    // TODO persist type information (polygon vs multipolygon)
-    return GeometryUtils.geometryToEsriShapeBytesWritable(bufferedGeometry);
-  }
 }

@@ -29,12 +29,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_GeomCollection",
-    value = "_FUNC_(wkt) - construct a multi-part ST_Geometry from OGC well-known text",
-    extended = "Example:\n"
-        + "  > SELECT _FUNC_('multipoint ((1 0), (2 3))') FROM src LIMIT 1;  -- constructs ST_MultiPoint\n"
-        + "OGC Compliance Notes : \n"
-        + " ST_GeomCollection on Hive does not support collections - only multi-part geometries.\n"
-        + "ST_GeomCollection('POINT(1 1), LINESTRING(2 0,3 0)') -- not supported\n")
+        value = "_FUNC_(wkt) - construct a multi-part ST_Geometry from OGC well-known text",
+        extended = "Example:\n"
+                + "  > SELECT _FUNC_('multipoint ((1 0), (2 3))') FROM src LIMIT 1;  -- constructs ST_MultiPoint\n"
+                + "OGC Compliance Notes : \n"
+                + " ST_GeomCollection on Hive does not support collections - only multi-part geometries.\n"
+                + "ST_GeomCollection('POINT(1 1), LINESTRING(2 0,3 0)') -- not supported\n")
 
 //@HivePdkUnitTests(
 //	cases = {
@@ -55,28 +55,28 @@ import org.slf4j.LoggerFactory;
 
 public class ST_GeomCollection extends ST_Geometry {
 
-  static final Logger LOG = LoggerFactory.getLogger(ST_GeomCollection.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_GeomCollection.class.getName());
 
-  public BytesWritable evaluate(Text wkt) throws UDFArgumentException {
-    return evaluate(wkt, 0);
-  }
-
-  public BytesWritable evaluate(Text wkwrap, int wkid) throws UDFArgumentException {
-
-    String wkt = wkwrap.toString();
-
-    try {
-      Geometry geomObj = GeometryEngine.geometryFromWkt(wkt, 0, Geometry.Type.Unknown);
-      SpatialReference spatialReference = null;  // Idea: OGCGeometry.setSpatialReference after .fromText
-      if (wkid != GeometryUtils.WKID_UNKNOWN) {
-        spatialReference = SpatialReference.create(wkid);
-      }
-      OGCGeometry ogcObj = OGCGeometry.createFromEsriGeometry(geomObj, spatialReference);
-      return GeometryUtils.geometryToEsriShapeBytesWritable(ogcObj);
-    } catch (Exception e) {  // IllegalArgumentException, GeometryException
-      LogUtils.Log_InvalidText(LOG, wkt);
-      return null;
+    public BytesWritable evaluate(Text wkt) throws UDFArgumentException {
+        return evaluate(wkt, 0);
     }
-  }
+
+    public BytesWritable evaluate(Text wkwrap, int wkid) throws UDFArgumentException {
+
+        String wkt = wkwrap.toString();
+
+        try {
+            Geometry geomObj = GeometryEngine.geometryFromWkt(wkt, 0, Geometry.Type.Unknown);
+            SpatialReference spatialReference = null;  // Idea: OGCGeometry.setSpatialReference after .fromText
+            if (wkid != GeometryUtils.WKID_UNKNOWN) {
+                spatialReference = SpatialReference.create(wkid);
+            }
+            OGCGeometry ogcObj = OGCGeometry.createFromEsriGeometry(geomObj, spatialReference);
+            return GeometryUtils.geometryToEsriShapeBytesWritable(ogcObj);
+        } catch (Exception e) {  // IllegalArgumentException, GeometryException
+            LogUtils.Log_InvalidText(LOG, wkt);
+            return null;
+        }
+    }
 
 }

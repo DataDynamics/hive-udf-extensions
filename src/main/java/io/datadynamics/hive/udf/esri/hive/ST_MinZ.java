@@ -25,9 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_MinZ",
-    value = "_FUNC_(geometry) - returns the minimum Z coordinate of geometry",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_PointZ(1.5, 2.5, 2)) FROM src LIMIT 1;  -- 2\n"
-        + "  SELECT _FUNC_(ST_LineString('linestring z (1.5 2.5 2, 3.0 2.2 1)')) FROM src LIMIT 1;  -- 1\n")
+        value = "_FUNC_(geometry) - returns the minimum Z coordinate of geometry",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_PointZ(1.5, 2.5, 2)) FROM src LIMIT 1;  -- 2\n"
+                + "  SELECT _FUNC_(ST_LineString('linestring z (1.5 2.5 2, 3.0 2.2 1)')) FROM src LIMIT 1;  -- 1\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -54,27 +54,27 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_MinZ extends ST_GeometryAccessor {
-  final DoubleWritable resultDouble = new DoubleWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_MinZ.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_MinZ.class.getName());
+    final DoubleWritable resultDouble = new DoubleWritable();
 
-  public DoubleWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+    public DoubleWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-    if (!ogcGeometry.is3D()) {
-      LogUtils.Log_Not3D(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+        if (!ogcGeometry.is3D()) {
+            LogUtils.Log_Not3D(LOG);
+            return null;
+        }
 
-    resultDouble.set(ogcGeometry.MinZ());
-    return resultDouble;
-  }
+        resultDouble.set(ogcGeometry.MinZ());
+        return resultDouble;
+    }
 
 }

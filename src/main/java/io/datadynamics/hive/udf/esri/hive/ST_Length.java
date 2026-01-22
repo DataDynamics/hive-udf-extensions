@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_Length",
-    value = "_FUNC_(line) - returns the length of line",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_Line(0.0,0.0, 3.0,4.0)) FROM src LIMIT 1;  --  5.0")
+        value = "_FUNC_(line) - returns the length of line",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_Line(0.0,0.0, 3.0,4.0)) FROM src LIMIT 1;  --  5.0")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -45,22 +45,22 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_Length extends ST_GeometryAccessor {
-  final DoubleWritable resultDouble = new DoubleWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_Length.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_Length.class.getName());
+    final DoubleWritable resultDouble = new DoubleWritable();
 
-  public DoubleWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    public DoubleWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        resultDouble.set(ogcGeometry.getEsriGeometry().calculateLength2D());
+        return resultDouble;
     }
-
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-
-    resultDouble.set(ogcGeometry.getEsriGeometry().calculateLength2D());
-    return resultDouble;
-  }
 }

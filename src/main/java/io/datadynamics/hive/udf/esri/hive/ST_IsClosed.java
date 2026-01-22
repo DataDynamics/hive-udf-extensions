@@ -27,9 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_IsClosed",
-    value = "_FUNC_(ST_[Multi]LineString) - return true if the linestring or multi-line is closed",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_LineString(0.,0., 3.,4., 0.,4., 0.,0.)) FROM src LIMIT 1;  -- true\n"
-        + "  SELECT _FUNC_(ST_LineString(0.,0., 3.,4.)) FROM src LIMIT 1;  -- false\n")
+        value = "_FUNC_(ST_[Multi]LineString) - return true if the linestring or multi-line is closed",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_LineString(0.,0., 3.,4., 0.,4., 0.,0.)) FROM src LIMIT 1;  -- true\n"
+                + "  SELECT _FUNC_(ST_LineString(0.,0., 3.,4.)) FROM src LIMIT 1;  -- false\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -60,45 +60,45 @@ import org.slf4j.LoggerFactory;
 //	)
 
 public class ST_IsClosed extends ST_GeometryAccessor {
-  final BooleanWritable resultBoolean = new BooleanWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_IsClosed.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_IsClosed.class.getName());
+    final BooleanWritable resultBoolean = new BooleanWritable();
 
-  public BooleanWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-
-    try {
-
-      switch (GeometryUtils.getType(geomref)) {
-      case ST_LINESTRING:
-      case ST_MULTILINESTRING:
-        MultiPath lines = (MultiPath) (ogcGeometry.getEsriGeometry());
-        int nPaths = lines.getPathCount();
-        boolean rslt = true;
-        for (int ix = 0; rslt && ix < nPaths; ix++) {
-          Point p0 = lines.getPoint(lines.getPathStart(ix));
-          Point pf = lines.getPoint(lines.getPathEnd(ix) - 1);
-          rslt = rslt && pf.equals(p0);  // no tolerance - OGC
+    public BooleanWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
         }
-        resultBoolean.set(rslt);
-        return resultBoolean;
-      default:  // ST_IsClosed gives ERROR on Point or Polygon, on Postgres/Oracle
-        LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_LINESTRING, GeometryUtils.getType(geomref));
-        return null;
-      }
 
-    } catch (Exception e) {
-      LogUtils.Log_InternalError(LOG, "ST_IsClosed" + e);
-      return null;
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        try {
+
+            switch (GeometryUtils.getType(geomref)) {
+                case ST_LINESTRING:
+                case ST_MULTILINESTRING:
+                    MultiPath lines = (MultiPath) (ogcGeometry.getEsriGeometry());
+                    int nPaths = lines.getPathCount();
+                    boolean rslt = true;
+                    for (int ix = 0; rslt && ix < nPaths; ix++) {
+                        Point p0 = lines.getPoint(lines.getPathStart(ix));
+                        Point pf = lines.getPoint(lines.getPathEnd(ix) - 1);
+                        rslt = rslt && pf.equals(p0);  // no tolerance - OGC
+                    }
+                    resultBoolean.set(rslt);
+                    return resultBoolean;
+                default:  // ST_IsClosed gives ERROR on Point or Polygon, on Postgres/Oracle
+                    LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_LINESTRING, GeometryUtils.getType(geomref));
+                    return null;
+            }
+
+        } catch (Exception e) {
+            LogUtils.Log_InternalError(LOG, "ST_IsClosed" + e);
+            return null;
+        }
+
     }
-
-  }
 }

@@ -25,11 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_Is3D",
-    value = "_FUNC_(geometry) - return true if the geometry object is three-dimensional",
-    extended = "Example:\n" + "  > SELECT _FUNC_(ST_Polygon(1,1, 1,4, 4,4, 4,1)) FROM src LIMIT 1;  -- false\n"
-        + "  > SELECT _FUNC_(ST_LineString(0.,0., 3.,4., 0.,4., 0.,0.)) FROM src LIMIT 1;  -- false\n"
-        + "  > SELECT _FUNC_(ST_Point(3., 4.)) FROM src LIMIT 1;  -- false\n"
-        + "  > SELECT _FUNC_(ST_PointZ(3., 4., 2)) FROM src LIMIT 1;  -- true\n")
+        value = "_FUNC_(geometry) - return true if the geometry object is three-dimensional",
+        extended = "Example:\n" + "  > SELECT _FUNC_(ST_Polygon(1,1, 1,4, 4,4, 4,1)) FROM src LIMIT 1;  -- false\n"
+                + "  > SELECT _FUNC_(ST_LineString(0.,0., 3.,4., 0.,4., 0.,0.)) FROM src LIMIT 1;  -- false\n"
+                + "  > SELECT _FUNC_(ST_Point(3., 4.)) FROM src LIMIT 1;  -- false\n"
+                + "  > SELECT _FUNC_(ST_PointZ(3., 4., 2)) FROM src LIMIT 1;  -- true\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -52,23 +52,23 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_Is3D extends ST_GeometryAccessor {
-  final BooleanWritable resultBoolean = new BooleanWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_Is3D.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_Is3D.class.getName());
+    final BooleanWritable resultBoolean = new BooleanWritable();
 
-  public BooleanWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    public BooleanWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        resultBoolean.set(ogcGeometry.is3D());
+        return resultBoolean;
     }
-
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-
-    resultBoolean.set(ogcGeometry.is3D());
-    return resultBoolean;
-  }
 
 }

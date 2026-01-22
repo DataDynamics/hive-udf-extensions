@@ -25,9 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_IsSimple",
-    value = "_FUNC_(geometry) - return true if geometry is simple",
-    extended = "Example:\n" + "  > SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1; -- true\n"
-        + "  > SELECT _FUNC_(ST_LineString(0.,0., 1.,1., 0.,1., 1.,0.)) FROM src LIMIT 1; -- false\n")
+        value = "_FUNC_(geometry) - return true if geometry is simple",
+        extended = "Example:\n" + "  > SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1; -- true\n"
+                + "  > SELECT _FUNC_(ST_LineString(0.,0., 1.,1., 0.,1., 1.,0.)) FROM src LIMIT 1; -- false\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -54,29 +54,29 @@ import org.slf4j.LoggerFactory;
 //	)
 
 public class ST_IsSimple extends ST_GeometryAccessor {
-  final BooleanWritable resultBoolean = new BooleanWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_IsSimple.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_IsSimple.class.getName());
+    final BooleanWritable resultBoolean = new BooleanWritable();
 
-  public BooleanWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    public BooleanWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        try {
+            resultBoolean.set(ogcGeometry.isSimple());
+        } catch (Exception e) {
+            LogUtils.Log_InternalError(LOG, "ST_IsSimple" + e);
+            return null;
+        }
+        return resultBoolean;
     }
-
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-
-    try {
-      resultBoolean.set(ogcGeometry.isSimple());
-    } catch (Exception e) {
-      LogUtils.Log_InternalError(LOG, "ST_IsSimple" + e);
-      return null;
-    }
-    return resultBoolean;
-  }
 
 }

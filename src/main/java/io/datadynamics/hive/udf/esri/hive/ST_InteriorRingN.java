@@ -27,9 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_InteriorRingN",
-    value = "_FUNC_(ST_Polygon, n) - return ST_LineString which is the nth interior ring of the ST_Polygon (1-based index)",
-    extended = "Example:\n"
-        + "  SELECT _FUNC_(ST_Polygon('polygon ((0 0, 8 0, 0 8, 0 0), (1 1, 1 5, 5 1, 1 1))'), 1) FROM src LIMIT 1;  -- LINESTRING (1 1, 5 1, 1 5, 1 1)\n")
+        value = "_FUNC_(ST_Polygon, n) - return ST_LineString which is the nth interior ring of the ST_Polygon (1-based index)",
+        extended = "Example:\n"
+                + "  SELECT _FUNC_(ST_Polygon('polygon ((0 0, 8 0, 0 8, 0 0), (1 1, 1 5, 5 1, 1 1))'), 1) FROM src LIMIT 1;  -- LINESTRING (1 1, 5 1, 1 5, 1 1)\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -44,33 +44,33 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_InteriorRingN extends ST_GeometryProcessing {
-  static final Logger LOG = LoggerFactory.getLogger(ST_InteriorRingN.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_InteriorRingN.class.getName());
 
-  public BytesWritable evaluate(BytesWritable geomref, IntWritable index) {
-    if (geomref == null || geomref.getLength() == 0 || index == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+    public BytesWritable evaluate(BytesWritable geomref, IntWritable index) {
+        if (geomref == null || geomref.getLength() == 0 || index == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    int idx = index.get() - 1;  // 1-based UI, 0-based engine
-    if (GeometryUtils.getType(geomref) == GeometryUtils.OGCType.ST_POLYGON) {
-      try {
-        OGCLineString hole = ((OGCPolygon) (ogcGeometry)).interiorRingN(idx);
-        return GeometryUtils.geometryToEsriShapeBytesWritable(hole);
-      } catch (Exception e) {
-        LogUtils.Log_InternalError(LOG, "ST_InteriorRingN: " + e);
-        return null;
-      }
-    } else {
-      LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_POLYGON, GeometryUtils.getType(geomref));
-      return null;
+        int idx = index.get() - 1;  // 1-based UI, 0-based engine
+        if (GeometryUtils.getType(geomref) == GeometryUtils.OGCType.ST_POLYGON) {
+            try {
+                OGCLineString hole = ((OGCPolygon) (ogcGeometry)).interiorRingN(idx);
+                return GeometryUtils.geometryToEsriShapeBytesWritable(hole);
+            } catch (Exception e) {
+                LogUtils.Log_InternalError(LOG, "ST_InteriorRingN: " + e);
+                return null;
+            }
+        } else {
+            LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_POLYGON, GeometryUtils.getType(geomref));
+            return null;
+        }
     }
-  }
 
 }

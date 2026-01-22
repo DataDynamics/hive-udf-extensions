@@ -25,11 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_AsGeoJSON",
-    value = "_FUNC_(geometry) - return GeoJSON representation of geometry\n",
-    extended = "Example:\n"
-        + "  SELECT _FUNC_(ST_Point(1.0, 2.0)) from onerow; -- {\"type\":\"Point\", \"coordinates\":[1.0, 2.0]}\n"
-        + "Note : \n" + " ST_AsGeoJSON outputs the _geometry_ contents but not _crs_.\n"
-        + " ST_AsGeoJSON requires geometry-api-java version 1.1 or later.\n")
+        value = "_FUNC_(geometry) - return GeoJSON representation of geometry\n",
+        extended = "Example:\n"
+                + "  SELECT _FUNC_(ST_Point(1.0, 2.0)) from onerow; -- {\"type\":\"Point\", \"coordinates\":[1.0, 2.0]}\n"
+                + "Note : \n" + " ST_AsGeoJSON outputs the _geometry_ contents but not _crs_.\n"
+                + " ST_AsGeoJSON requires geometry-api-java version 1.1 or later.\n")
 //@HivePdkUnitTests(
 //	cases = { 
 //		@HivePdkUnitTest(
@@ -48,29 +48,29 @@ import org.slf4j.LoggerFactory;
 //	)
 
 public class ST_AsGeoJson extends ST_Geometry {
-  final Text resultText = new Text();
-  static final Logger LOG = LoggerFactory.getLogger(ST_AsGeoJson.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_AsGeoJson.class.getName());
+    final Text resultText = new Text();
 
-  public Text evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+    public Text evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    try {
-      String outJson = ogcGeometry.asGeoJson();
-      resultText.set(outJson);
-      return resultText;
-    } catch (Exception e) {
-      LogUtils.Log_InternalError(LOG, "ST_AsGeoJSON: " + e);
-      return null;
+        try {
+            String outJson = ogcGeometry.asGeoJson();
+            resultText.set(outJson);
+            return resultText;
+        } catch (Exception e) {
+            LogUtils.Log_InternalError(LOG, "ST_AsGeoJSON: " + e);
+            return null;
+        }
     }
-  }
 
 }

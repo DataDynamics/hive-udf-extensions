@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_AsText",
-    value = "_FUNC_(ST_Geometry) - return Well-Known Text (WKT) representation of ST_Geometry\n",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(1, 2)) FROM onerow;  --  POINT (1 2)\n")
+        value = "_FUNC_(ST_Geometry) - return Well-Known Text (WKT) representation of ST_Geometry\n",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(1, 2)) FROM onerow;  --  POINT (1 2)\n")
 //@HivePdkUnitTests(
 //	cases = { 
 //		@HivePdkUnitTest(
@@ -52,48 +52,48 @@ import org.slf4j.LoggerFactory;
 //	)
 public class ST_AsText extends ST_Geometry {
 
-  static final Logger LOG = LoggerFactory.getLogger(ST_AsText.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_AsText.class.getName());
 
-  public Text evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    public Text evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        int wktExportFlag = getWktExportFlag(GeometryUtils.getType(geomref));
+
+        try {
+            // mind: GeometryType with ST_AsText(ST_GeomFromText('MultiLineString((0 80, 0.03 80.04))'))
+            // return new Text(ogcGeometry.asText());
+            return new Text(GeometryEngine.geometryToWkt(ogcGeometry.getEsriGeometry(), wktExportFlag));
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            return null;
+        }
     }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    private int getWktExportFlag(OGCType type) {
+        switch (type) {
+            case ST_POLYGON:
+                return WktExportFlags.wktExportPolygon;
+            case ST_MULTIPOLYGON:
+                return WktExportFlags.wktExportMultiPolygon;
+            case ST_POINT:
+                return WktExportFlags.wktExportPoint;
+            case ST_MULTIPOINT:
+                return WktExportFlags.wktExportMultiPoint;
+            case ST_LINESTRING:
+                return WktExportFlags.wktExportLineString;
+            case ST_MULTILINESTRING:
+                return WktExportFlags.wktExportMultiLineString;
+            default:
+                return WktExportFlags.wktExportDefaults;
+        }
     }
-
-    int wktExportFlag = getWktExportFlag(GeometryUtils.getType(geomref));
-
-    try {
-      // mind: GeometryType with ST_AsText(ST_GeomFromText('MultiLineString((0 80, 0.03 80.04))'))
-      // return new Text(ogcGeometry.asText());
-      return new Text(GeometryEngine.geometryToWkt(ogcGeometry.getEsriGeometry(), wktExportFlag));
-    } catch (Exception e) {
-      LOG.error(e.getMessage());
-      return null;
-    }
-  }
-
-  private int getWktExportFlag(OGCType type) {
-    switch (type) {
-    case ST_POLYGON:
-      return WktExportFlags.wktExportPolygon;
-    case ST_MULTIPOLYGON:
-      return WktExportFlags.wktExportMultiPolygon;
-    case ST_POINT:
-      return WktExportFlags.wktExportPoint;
-    case ST_MULTIPOINT:
-      return WktExportFlags.wktExportMultiPoint;
-    case ST_LINESTRING:
-      return WktExportFlags.wktExportLineString;
-    case ST_MULTILINESTRING:
-      return WktExportFlags.wktExportMultiLineString;
-    default:
-      return WktExportFlags.wktExportDefaults;
-    }
-  }
 }

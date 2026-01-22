@@ -26,42 +26,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_StartPoint",
-    value = "_FUNC_(geometry) - returns the first point of an ST_Linestring",
-    extended = "Example:\n"
-        + "  > SELECT _FUNC_(ST_LineString(1.5,2.5, 3.0,2.2)) FROM src LIMIT 1;  -- POINT(1.5 2.5)\n")
+        value = "_FUNC_(geometry) - returns the first point of an ST_Linestring",
+        extended = "Example:\n"
+                + "  > SELECT _FUNC_(ST_LineString(1.5,2.5, 3.0,2.2)) FROM src LIMIT 1;  -- POINT(1.5 2.5)\n")
 
 public class ST_StartPoint extends ST_GeometryAccessor {
-  static final Logger LOG = LoggerFactory.getLogger(ST_StartPoint.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_StartPoint.class.getName());
 
-  /**
-   * Return the first point of the ST_Linestring.
-   * @param geomref hive geometry bytes
-   * @return byte-reference of the first ST_Point
-   */
-  public BytesWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+    /**
+     * Return the first point of the ST_Linestring.
+     *
+     * @param geomref hive geometry bytes
+     * @return byte-reference of the first ST_Point
+     */
+    public BytesWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    if (GeometryUtils.getType(geomref) == GeometryUtils.OGCType.ST_LINESTRING) {
-      MultiPath lines = (MultiPath) (ogcGeometry.getEsriGeometry());
-      int wkid = GeometryUtils.getWKID(geomref);
-      SpatialReference spatialReference = null;
-      if (wkid != GeometryUtils.WKID_UNKNOWN) {
-        spatialReference = SpatialReference.create(wkid);
-      }
-      return GeometryUtils
-          .geometryToEsriShapeBytesWritable(OGCGeometry.createFromEsriGeometry(lines.getPoint(0), spatialReference));
-    } else {
-      LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_LINESTRING, GeometryUtils.getType(geomref));
-      return null;
+        if (GeometryUtils.getType(geomref) == GeometryUtils.OGCType.ST_LINESTRING) {
+            MultiPath lines = (MultiPath) (ogcGeometry.getEsriGeometry());
+            int wkid = GeometryUtils.getWKID(geomref);
+            SpatialReference spatialReference = null;
+            if (wkid != GeometryUtils.WKID_UNKNOWN) {
+                spatialReference = SpatialReference.create(wkid);
+            }
+            return GeometryUtils
+                    .geometryToEsriShapeBytesWritable(OGCGeometry.createFromEsriGeometry(lines.getPoint(0), spatialReference));
+        } else {
+            LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_LINESTRING, GeometryUtils.getType(geomref));
+            return null;
+        }
     }
-  }
 }

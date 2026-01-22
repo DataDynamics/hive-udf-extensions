@@ -26,8 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_M",
-    value = "_FUNC_(geometry) - return true if the geometry object is three-dimensional",
-    extended = "Example:\n" + "  > SELECT _FUNC_(ST_PointM(3., 4., 2)) FROM src LIMIT 1;  -- 2\n")
+        value = "_FUNC_(geometry) - return true if the geometry object is three-dimensional",
+        extended = "Example:\n" + "  > SELECT _FUNC_(ST_PointM(3., 4., 2)) FROM src LIMIT 1;  -- 2\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -50,33 +50,33 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_M extends ST_GeometryAccessor {
-  final DoubleWritable resultDouble = new DoubleWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_M.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_M.class.getName());
+    final DoubleWritable resultDouble = new DoubleWritable();
 
-  public DoubleWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+    public DoubleWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      return null;
-    }
-    if (!ogcGeometry.isMeasured()) {
-      LogUtils.Log_NotMeasured(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            return null;
+        }
+        if (!ogcGeometry.isMeasured()) {
+            LogUtils.Log_NotMeasured(LOG);
+            return null;
+        }
 
-    switch (GeometryUtils.getType(geomref)) {
-    case ST_POINT:
-      OGCPoint pt = (OGCPoint) ogcGeometry;
-      resultDouble.set(pt.M());
-      return resultDouble;
-    default:
-      LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_POINT, GeometryUtils.getType(geomref));
-      return null;
+        switch (GeometryUtils.getType(geomref)) {
+            case ST_POINT:
+                OGCPoint pt = (OGCPoint) ogcGeometry;
+                resultDouble.set(pt.M());
+                return resultDouble;
+            default:
+                LogUtils.Log_InvalidType(LOG, GeometryUtils.OGCType.ST_POINT, GeometryUtils.getType(geomref));
+                return null;
+        }
     }
-  }
 
 }

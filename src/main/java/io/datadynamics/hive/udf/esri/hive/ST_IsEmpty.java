@@ -25,9 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_IsEmpty",
-    value = "_FUNC_(geometry) - return true if the geometry object is empty of geometric information",
-    extended = "Example:\n" + "  > SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1;  -- false\n"
-        + "  > SELECT _FUNC_(ST_GeomFromText('point empty')) FROM src LIMIT 1;  -- true\n")
+        value = "_FUNC_(geometry) - return true if the geometry object is empty of geometric information",
+        extended = "Example:\n" + "  > SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1;  -- false\n"
+                + "  > SELECT _FUNC_(ST_GeomFromText('point empty')) FROM src LIMIT 1;  -- true\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -50,27 +50,27 @@ import org.slf4j.LoggerFactory;
 //	)
 
 public class ST_IsEmpty extends ST_GeometryAccessor {
-  final BooleanWritable resultBoolean = new BooleanWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_IsEmpty.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_IsEmpty.class.getName());
+    final BooleanWritable resultBoolean = new BooleanWritable();
 
-  public BooleanWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+    public BooleanWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
 
-    try {
-      resultBoolean.set(ogcGeometry.isEmpty());
-    } catch (Exception e) {
-      LogUtils.Log_InternalError(LOG, "ST_IsEmpty" + e);
-      return null;
+        try {
+            resultBoolean.set(ogcGeometry.isEmpty());
+        } catch (Exception e) {
+            LogUtils.Log_InternalError(LOG, "ST_IsEmpty" + e);
+            return null;
+        }
+        return resultBoolean;
     }
-    return resultBoolean;
-  }
 }

@@ -24,10 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_GeometryType",
-    value = "_FUNC_(geometry) - return type of geometry",
-    extended = "Example:\n" + "  > SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1;  -- ST_Point\n"
-        + "  > SELECT _FUNC_(ST_LineString(1.5,2.5, 3.0,2.2)) FROM src LIMIT 1;  -- ST_LineString\n"
-        + "  > SELECT _FUNC_(ST_Polygon(2,0, 2,3, 3,0)) FROM src LIMIT 1;  -- ST_Polygon\n")
+        value = "_FUNC_(geometry) - return type of geometry",
+        extended = "Example:\n" + "  > SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1;  -- ST_Point\n"
+                + "  > SELECT _FUNC_(ST_LineString(1.5,2.5, 3.0,2.2)) FROM src LIMIT 1;  -- ST_LineString\n"
+                + "  > SELECT _FUNC_(ST_Polygon(2,0, 2,3, 3,0)) FROM src LIMIT 1;  -- ST_Polygon\n")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -58,13 +58,13 @@ import org.slf4j.LoggerFactory;
 //	)
 
 public class ST_GeometryType extends ST_Geometry {
-  static final Logger LOG = LoggerFactory.getLogger(ST_GeometryType.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_GeometryType.class.getName());
 
-  public Text evaluate(BytesWritable ref) {
-    if (ref == null || ref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    public Text evaluate(BytesWritable ref) {
+        if (ref == null || ref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+        return new Text(GeometryUtils.getType(ref).toString());
     }
-    return new Text(GeometryUtils.getType(ref).toString());
-  }
 }

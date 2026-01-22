@@ -24,8 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_SRID",
-    value = "_FUNC_(ST_Geometry) - get the Spatial Reference ID of the geometry",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1  -- returns SRID 0")
+        value = "_FUNC_(ST_Geometry) - get the Spatial Reference ID of the geometry",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_Point(1.5, 2.5)) FROM src LIMIT 1  -- returns SRID 0")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -36,17 +36,17 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_SRID extends ST_GeometryAccessor {
-  static final Logger LOG = LoggerFactory.getLogger(ST_SRID.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_SRID.class.getName());
 
-  IntWritable resultInt = new IntWritable();
+    IntWritable resultInt = new IntWritable();
 
-  public IntWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    public IntWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        resultInt.set(GeometryUtils.getWKID(geomref));
+        return resultInt;
     }
-
-    resultInt.set(GeometryUtils.getWKID(geomref));
-    return resultInt;
-  }
 }

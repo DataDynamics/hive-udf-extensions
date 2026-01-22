@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Description(name = "ST_Area",
-    value = "_FUNC_(ST_Polygon) - returns the area of polygon or multipolygon",
-    extended = "Example:\n" + "  SELECT _FUNC_(ST_Polygon(1,1, 1,4, 4,4, 4,1)) FROM src LIMIT 1;  --  9.0")
+        value = "_FUNC_(ST_Polygon) - returns the area of polygon or multipolygon",
+        extended = "Example:\n" + "  SELECT _FUNC_(ST_Polygon(1,1, 1,4, 4,4, 4,1)) FROM src LIMIT 1;  --  9.0")
 //@HivePdkUnitTests(
 //	cases = {
 //		@HivePdkUnitTest(
@@ -49,22 +49,22 @@ import org.slf4j.LoggerFactory;
 //)
 
 public class ST_Area extends ST_GeometryAccessor {
-  final DoubleWritable resultDouble = new DoubleWritable();
-  static final Logger LOG = LoggerFactory.getLogger(ST_Area.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(ST_Area.class.getName());
+    final DoubleWritable resultDouble = new DoubleWritable();
 
-  public DoubleWritable evaluate(BytesWritable geomref) {
-    if (geomref == null || geomref.getLength() == 0) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
+    public DoubleWritable evaluate(BytesWritable geomref) {
+        if (geomref == null || geomref.getLength() == 0) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
+        if (ogcGeometry == null) {
+            LogUtils.Log_ArgumentsNull(LOG);
+            return null;
+        }
+
+        resultDouble.set(ogcGeometry.getEsriGeometry().calculateArea2D());
+        return resultDouble;
     }
-
-    OGCGeometry ogcGeometry = GeometryUtils.geometryFromEsriShape(geomref);
-    if (ogcGeometry == null) {
-      LogUtils.Log_ArgumentsNull(LOG);
-      return null;
-    }
-
-    resultDouble.set(ogcGeometry.getEsriGeometry().calculateArea2D());
-    return resultDouble;
-  }
 }
