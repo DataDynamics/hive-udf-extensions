@@ -294,3 +294,4 @@ Returned 4 row(s) in 0.22s
 ```
 
 Impala UDF에 대한 자세한 사항은 https://impala.apache.org/docs/build/html/topics/impala_udf.html 을 참고하십시오.
+또한 Cloudera의 CDP 문서인 https://docs.cloudera.com/runtime/7.3.1/impala-sql-reference/topics/impala-udf.html 을 참고하십시오.
