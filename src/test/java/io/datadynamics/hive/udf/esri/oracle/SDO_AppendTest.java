@@ -34,6 +34,9 @@ public class SDO_AppendTest {
         OGCLineString ogcLine1 = new OGCLineString(line1, 0, sr);
         BytesWritable geom1 = GeometryUtils.geometryToEsriShapeBytesWritable(ogcLine1);
 
+        System.out.println(ogcLine1.asText());
+        System.out.println(PrettyHexDump.prettyHexDump(geom1.getBytes()));
+
         // Line 2: (2,2) to (3,3)
         Polyline line2 = new Polyline();
         line2.startPath(2, 2);
@@ -41,11 +44,20 @@ public class SDO_AppendTest {
         OGCLineString ogcLine2 = new OGCLineString(line2, 0, sr);
         BytesWritable geom2 = GeometryUtils.geometryToEsriShapeBytesWritable(ogcLine2);
 
+        System.out.println(ogcLine2.asText());
+        System.out.println(PrettyHexDump.prettyHexDump(geom2.getBytes()));
+
+        // Result
         BytesWritable result = udf.evaluate(geom1, geom2);
 
         assertNotNull(result);
         OGCGeometry ogcResult = GeometryUtils.geometryFromEsriShape(result);
         assertEquals("MultiLineString", ogcResult.geometryType());
+
+        // Print Result
+        System.out.println(ogcResult.asText());
+        byte[] array = ogcResult.asBinary().array();
+        System.out.println(PrettyHexDump.prettyHexDump(array));
 
         // MultiLineString should have 2 paths (parts)
         Polyline resultPolyline = (Polyline) ogcResult.getEsriGeometry();
@@ -104,6 +116,7 @@ public class SDO_AppendTest {
         Point point1 = new Point(0, 0);
         OGCPoint ogcPoint1 = new OGCPoint(point1, sr);
         BytesWritable geom1 = GeometryUtils.geometryToEsriShapeBytesWritable(ogcPoint1);
+
         System.out.println(ogcPoint1.asText());
         System.out.println(PrettyHexDump.prettyHexDump(geom1.getBytes()));
 
@@ -113,14 +126,17 @@ public class SDO_AppendTest {
         line2.lineTo(3, 3);
         OGCLineString ogcLine2 = new OGCLineString(line2, 0, sr);
         BytesWritable geom2 = GeometryUtils.geometryToEsriShapeBytesWritable(ogcLine2);
+
         System.out.println(ogcLine2.asText());
         System.out.println(PrettyHexDump.prettyHexDump(geom2.getBytes()));
 
+        // Result
         BytesWritable result = udf.evaluate(geom1, geom2);
         assertNotNull(result);
         OGCGeometry ogcResult = GeometryUtils.geometryFromEsriShape(result);
         assertEquals("MultiLineString", ogcResult.geometryType());
 
+        // Print Result
         System.out.println(ogcResult.asText());
         byte[] array = ogcResult.asBinary().array();
         System.out.println(PrettyHexDump.prettyHexDump(array));
