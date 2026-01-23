@@ -1,13 +1,8 @@
 package io.datadynamics.hive.udf.esri.oracle;
 
-import com.esri.core.geometry.Polygon;
 import com.esri.core.geometry.SpatialReference;
 import com.esri.core.geometry.ogc.OGCPolygon;
 import io.datadynamics.hive.udf.esri.hive.GeometryUtils;
-import org.apache.hadoop.hive.ql.metadata.HiveException;
-import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,76 +22,39 @@ public class SDO_ValidateGeometryWithContextTest {
     }
 
     @Test
-    public void testEvaluate_ValidPolygon() throws HiveException {
-        ObjectInspector binaryOI = PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
-        udf.initialize(new ObjectInspector[]{binaryOI});
-
-        Polygon poly = new Polygon();
-        poly.startPath(0, 0);
-        poly.lineTo(10, 0);
-        poly.lineTo(10, 10);
-        poly.lineTo(0, 10);
-        poly.closePathWithLine();
-
-        OGCPolygon ogcPoly = new OGCPolygon(poly, sr);
+    public void testEvaluate_ValidPolygon() {
+        // OGC 기준에 맞는 유효한 폴리곤 (정규화된 형태)
+        String wkt = "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))";
+        OGCPolygon ogcPoly = (OGCPolygon) OGCPolygon.fromText(wkt);
+        ogcPoly.setSpatialReference(sr);
         BytesWritable geom = GeometryUtils.geometryToEsriShapeBytesWritable(ogcPoly);
 
-        GenericUDF.DeferredObject[] args = new GenericUDF.DeferredObject[]{
-                new GenericUDF.DeferredJavaObject(geom)
-        };
-
-        Object result = udf.evaluate(args);
-        // ESRI's OGCGeometry.isSimple() might return false for polygons even if they are valid
-        // because it's designed for points/lines. For polygons, OGC uses 'isValid'.
-        // But ESRI OGC API often returns false for isSimple on Polygons.
-        // We accept the current behavior of the API.
-        assertTrue(result.toString().equals("TRUE") || result.toString().equals("FALSE"));
+        String result = udf.evaluate(geom);
+        assertEquals("TRUE", result);
     }
 
     @Test
-    public void testEvaluate_SelfIntersectingPolygon() throws HiveException {
-        ObjectInspector binaryOI = PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
-        udf.initialize(new ObjectInspector[]{binaryOI});
-
+    public void testEvaluate_SelfIntersectingPolygon() {
         // 8자 형태의 자가 교차 폴리곤 WKT
         String wkt = "POLYGON ((0 0, 10 10, 0 10, 10 0, 0 0))";
         OGCPolygon ogcPoly = (OGCPolygon) OGCPolygon.fromText(wkt);
         ogcPoly.setSpatialReference(sr);
         BytesWritable geom = GeometryUtils.geometryToEsriShapeBytesWritable(ogcPoly);
 
-        GenericUDF.DeferredObject[] args = new GenericUDF.DeferredObject[]{
-                new GenericUDF.DeferredJavaObject(geom)
-        };
-
-        Object result = udf.evaluate(args);
-        String resultStr = result.toString();
-        System.out.println("Result: " + resultStr);
-        assertEquals("FALSE", resultStr);
+        String result = udf.evaluate(geom);
+        System.out.println("Result: " + result);
+        assertTrue(result.startsWith("FALSE:"));
     }
 
     @Test
-    public void testEvaluate_NullInput() throws HiveException {
-        ObjectInspector binaryOI = PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
-        udf.initialize(new ObjectInspector[]{binaryOI});
-
-        GenericUDF.DeferredObject[] args = new GenericUDF.DeferredObject[]{
-                new GenericUDF.DeferredJavaObject(null)
-        };
-
-        Object result = udf.evaluate(args);
-        assertEquals("NULL GEOMETRY", result.toString());
+    public void testEvaluate_NullInput() {
+        String result = udf.evaluate(null);
+        assertEquals("NULL GEOMETRY", result);
     }
 
     @Test
-    public void testEvaluate_EmptyInput() throws HiveException {
-        ObjectInspector binaryOI = PrimitiveObjectInspectorFactory.writableBinaryObjectInspector;
-        udf.initialize(new ObjectInspector[]{binaryOI});
-
-        GenericUDF.DeferredObject[] args = new GenericUDF.DeferredObject[]{
-                new GenericUDF.DeferredJavaObject(new BytesWritable(new byte[0]))
-        };
-
-        Object result = udf.evaluate(args);
-        assertEquals("NULL GEOMETRY", result.toString());
+    public void testEvaluate_EmptyInput() {
+        String result = udf.evaluate(new BytesWritable(new byte[0]));
+        assertEquals("NULL GEOMETRY", result);
     }
 }

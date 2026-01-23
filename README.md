@@ -199,7 +199,7 @@ DROP FUNCTION IF EXISTS poc.SDO_Simplify(BINARY);
 DROP FUNCTION IF EXISTS poc.SDO_Simplify(BINARY, DOUBLE);
 DROP FUNCTION IF EXISTS poc.SDO_SplitGeomSegment(BINARY, DOUBLE);
 DROP FUNCTION IF EXISTS poc.SDO_Transform(BINARY, STRING, STRING);
-DROP FUNCTION IF EXISTS poc.SDO_ValidateGeometryWithContext(BINARY, STRING, STRING);
+DROP FUNCTION IF EXISTS poc.SDO_ValidateGeometryWithContext(BINARY);
 
 CREATE FUNCTION poc.SDO_Append(BINARY, BINARY)              RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Append';
 CREATE FUNCTION poc.SDO_ClosestPoints(BINARY, BINARY)       RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_ClosestPoints';
