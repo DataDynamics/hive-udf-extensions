@@ -15,6 +15,29 @@ import org.slf4j.LoggerFactory;
  * <p>이 함수는 Oracle Spatial의 SDO_GEOM.SDO_CONCAVEHULL 또는 SDO_GEOM.SDO_CONCAVEHULL_BOUNDARY
  * 함수와 유사한 기능을 제공합니다.</p>
  *
+ * <h3>tolerance (Maximum Edge Length) 파라미터</h3>
+ * <p>tolerance 값은 결과 다각형 경계의 최대 변(edge) 길이를 제한합니다:</p>
+ * <table border="1">
+ *   <tr><th>tolerance 값</th><th>결과</th><th>설명</th></tr>
+ *   <tr><td>큰 값 (또는 NULL)</td><td>Convex Hull에 가까움</td><td>긴 변을 허용하여 볼록한 형태</td></tr>
+ *   <tr><td>중간 값</td><td>적당히 오목함</td><td>일반적인 Concave Hull</td></tr>
+ *   <tr><td>작은 값</td><td>매우 오목함</td><td>점들의 형태를 세밀하게 따라감</td></tr>
+ *   <tr><td>너무 작은 값</td><td>분리된 다각형</td><td>연결이 끊어질 수 있음</td></tr>
+ * </table>
+ *
+ * <pre>
+ *   tolerance 효과 시각화:
+ *
+ *   tolerance = ∞ (Convex)      tolerance = 50           tolerance = 10
+ *   ┌───────────────┐           ┌────────┐              ┌──┐
+ *   │               │           │   ╲    │              │ ╲│
+ *   │               │           │    ╲   │              │  │
+ *   │               │           │     ╲  │              │ ╱│
+ *   │               │           │      ╲ │              │╱ │
+ *   └───────────────┘           └────────┘              └──┘
+ *   (볼록한 형태)               (약간 오목)             (매우 오목)
+ * </pre>
+ *
  * <p><b>주의:</b> ESRI Geometry API(v2.2.4)는 공식적으로 Concave Hull 알고리즘을 직접 지원하지 않습니다.
  * 따라서 본 구현에서는 차선책으로 <b>Convex Hull</b>을 반환합니다.
  * 정밀한 Concave Hull 계산이 필요한 경우 JTS 기반의 구현체를 사용하십시오.</p>
