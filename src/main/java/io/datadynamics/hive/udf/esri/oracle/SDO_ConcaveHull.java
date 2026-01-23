@@ -63,9 +63,4 @@ public class SDO_ConcaveHull extends ST_GeometryAccessor {
     public BytesWritable evaluate(BytesWritable geometryref1) {
         return evaluate(geometryref1, null);
     }
-
-    public String getDisplayString(String[] children) {
-        return "SDO_ConcaveHull(" + children[0] + ")";
-    }
-
 }

@@ -21,6 +21,17 @@ Coordinates for geometries may be 2D (x, y), 3D (x, y, z) or 4D (x, y, z, m). Ge
 
 Apache Impala의 GeoSpatial Function은 Hive ESRI(https://github.com/Esri/spatial-framework-for-hadoop/wiki/UDF-Documentation)을 기반으로 하고 있으며 native하고 C++로 구현되어 있습니다.
 
+### Impala GeoSpatial의 포맷
+
+* Impala는 https://github.com/Esri/spatial-framework-for-hadoop의 Binary 포맷을 사용
+* 이 shapefile 내부의 바이너리 포멧 + 헤더로 구성
+* 헤더에 대한 설명 - https://github.com/apache/impala/blob/master/be/src/exprs/geo/shape-format.h
+* 임팔라 GeoSpatial Query시 보통 WKB를 사용하고, 변환/복원에 사용하는 함수는 다음과 같음
+  * `ST_AsBinary` 
+  * `ST_GeomFromWKB`
+  * 바이너리 포맷을 ESRI로 변환하는 로직 : `com.esri.hadoop.hive.GeometryUtils`
+    * https://github.com/Esri/spatial-framework-for-hadoop/blob/master/hive/src/main/java/com/esri/hadoop/hive/GeometryUtils.java 
+
 ## Use
 
 ### Temporary Use
