@@ -245,7 +245,7 @@ Impala는 ST_Envelope를 통해 MBR을 구하며, 좌표 추출은 별도 함수
 
 다음은 Java UDF를 Impala에서 사용하는 방법입니다. Impala에서 Hive UDF를 사용하려면 HDFS에 Jar 파일을 업로드한 후에 사용해야 하며, 함수의 signature를 명시적으로 지정해야 합니다.
 
-```
+```text
 [localhost:21000] > create database udfs;
 [localhost:21000] > use udfs;
 localhost:21000] > create function lower(string) returns string location '/user/hive/udfs/hive.jar' symbol='org.apache.hadoop.hive.ql.udf.UDFLower';
@@ -295,3 +295,34 @@ Returned 4 row(s) in 0.22s
 
 Impala UDF에 대한 자세한 사항은 https://impala.apache.org/docs/build/html/topics/impala_udf.html 을 참고하십시오.
 또한 Cloudera의 CDP 문서인 https://docs.cloudera.com/runtime/7.3.1/impala-sql-reference/topics/impala-udf.html 을 참고하십시오.
+
+함수 변경시 다음의 절차에 따라서 진행합니다.
+
+* JAR 파일 업로드
+
+```text
+# 기존 파일 교체 시
+hadoop fs -put -f my-udf-v2.jar /user/lib/udf/my-udf.jar
+```
+
+* 기존 함수 삭제
+
+```sql
+DROP FUNCTION IF EXISTS my_database.calculate_discount(STRING, DOUBLE);
+```
+
+* 함수 재등록
+
+```sql
+CREATE FUNCTION my_database.calculate_discount(STRING, DOUBLE)
+RETURNS DOUBLE
+LOCATION '/user/lib/udf/my-udf.jar'
+SYMBOL='com.example.hive.udf.CalculateDiscount'; 
+```
+* 메타데이터 갱신 및 동기화
+
+```sql
+INVALIDATE METADATA my_database.calculate_discount;
+-- 또는 간단하게
+REFRESH FUNCTIONS my_database;
+```
