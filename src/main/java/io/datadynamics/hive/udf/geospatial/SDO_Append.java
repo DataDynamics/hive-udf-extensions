@@ -1,5 +1,7 @@
 package io.datadynamics.hive.udf.geospatial;
 
+import com.esri.core.geometry.OperatorExportToWkb;
+import com.esri.core.geometry.ogc.OGCGeometry;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
@@ -17,6 +19,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 public class SDO_Append extends GenericUDF {
 
     private final GeometryFactory factory = new GeometryFactory();
+    private final OperatorExportToWkb exporter = OperatorExportToWkb.local();
     private transient BinaryObjectInspector g1OI;
     private transient BinaryObjectInspector g2OI;
 
@@ -39,20 +42,49 @@ public class SDO_Append extends GenericUDF {
         Object g2Obj = arguments[1].get();
 
         BytesWritable g1Bytes = g1OI.getPrimitiveWritableObject(g1Obj);
+        System.out.println("g1Bytes = " + g1Bytes);
         BytesWritable g2Bytes = g2OI.getPrimitiveWritableObject(g2Obj);
+        System.out.println("g2Bytes = " + g2Bytes);
 
-        Geometry g1 = GeometryUtils.bytesToGeometry(g1Bytes);
-        Geometry g2 = GeometryUtils.bytesToGeometry(g2Bytes);
+        OGCGeometry ogcG1 = io.datadynamics.hive.udf.esri.hive.GeometryUtils.geometryFromEsriShape(g1Bytes);
+        System.out.println("ogcG1 = " + ogcG1);
+        OGCGeometry ogcG2 = io.datadynamics.hive.udf.esri.hive.GeometryUtils.geometryFromEsriShape(g2Bytes);
+        System.out.println("ogcG2 = " + ogcG2);
+
+        Geometry g1 = tryGetJTSGeom(ogcG1, g1Bytes);
+        Geometry g2 = tryGetJTSGeom(ogcG2, g2Bytes);
+
+        System.out.println("g1 = " + g1);
+        System.out.println("g2 = " + g2);
 
         if (g1 == null) return g2Bytes;
         if (g2 == null) return g1Bytes;
 
-        // 두 객체를 배열로 묶어 Collection 생성
-        Geometry[] geometries = new Geometry[]{g1, g2};
+        boolean isEsriG1 = ogcG1 != null;
+        boolean isEsriG2 = ogcG2 != null;
 
-        // 더 정교한 구현을 위해서는 입력 타입(Polygon, LineString)을 확인하여
-        // MultiPolygon, MultiLineString 등 구체적 타입으로 반환할 수 있음
-        return GeometryUtils.geometryToBytes(factory.createGeometryCollection(geometries));
+        if (isEsriG1 && isEsriG2) {
+            return io.datadynamics.hive.udf.esri.hive.GeometryUtils.geometryToEsriShapeBytesWritable(ogcG1.union(ogcG2));
+        } else {
+            // 두 객체를 배열로 묶어 Collection 생성
+            Geometry[] geometries = new Geometry[]{g1, g2};
+
+            // 더 정교한 구현을 위해서는 입력 타입(Polygon, LineString)을 확인하여
+            // MultiPolygon, MultiLineString 등 구체적 타입으로 반환할 수 있음
+            return GeometryUtils.geometryToBytes(factory.createGeometryCollection(geometries));
+        }
+    }
+
+    private Geometry tryGetJTSGeom(OGCGeometry ogcGeom, BytesWritable w) {
+        Geometry jtsGeom;
+        if (ogcGeom == null) {// jts
+            jtsGeom = GeometryUtils.bytesToGeometry(w);
+        } else {// esri
+            com.esri.core.geometry.Geometry esriGeom = ogcGeom.getEsriGeometry();
+            byte[] wkb = exporter.execute(0, esriGeom, null).array();
+            jtsGeom = GeometryUtils.bytesToGeometry(new BytesWritable(wkb));
+        }
+        return jtsGeom;
     }
 
     @Override
