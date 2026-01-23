@@ -21,6 +21,20 @@ import org.slf4j.LoggerFactory;
  *       주로 폴리곤의 외곽선(Outer Ring)이나 내곽선(Inner Ring)을 추출할 때 사용합니다.</li>
  * </ul>
  *
+ * <h3>Ring(링)의 개념</h3>
+ * <p>Polygon은 하나의 외곽선(Exterior Ring)과 0개 이상의 구멍(Interior Ring/Hole)으로 구성됩니다.</p>
+ * <pre>
+ * ┌─────────────────────────────┐
+ * │  Exterior Ring (ringIndex=1)│
+ * │    ┌─────────┐              │
+ * │    │ Hole 1  │              │
+ * │    │(rIdx=2) │   ┌─────┐    │
+ * │    └─────────┘   │Hole2│    │
+ * │                  │(r=3)│    │
+ * │                  └─────┘    │
+ * └─────────────────────────────┘
+ * </pre>
+ *
  * 함수 사용시 Oracle의 index 시작과 UDF의 index 시작이 1부터 시작하는 점에 유의하세요.
  *
  * @see <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/spatl/SDO_GEOM-reference.html#GUID-E1E7D012-70B3-4E82-9333-33C4092E4264">Oracle SDO_GEOM.SDO_EXTRACT</a>
