@@ -20,16 +20,16 @@ public class SDO_ConvertToStdGeom extends ST_GeometryAccessor {
     /**
      * 입력 기하 구조를 표준 기하 구조로 변환합니다.
      *
-     * @param geometryref ESRI Shape 형식의 기하 데이터 (BytesWritable)
+     * @param geom ESRI Shape 형식의 기하 데이터 (BytesWritable)
      * @return 표준화된 기하 데이터를 포함하는 BytesWritable. 오류 시 null.
      */
-    public BytesWritable evaluate(BytesWritable geometryref) {
-        if (geometryref == null || geometryref.getLength() == 0) {
+    public BytesWritable evaluate(BytesWritable geom) {
+        if (geom == null || geom.getLength() == 0) {
             return null;
         }
 
         try {
-            OGCGeometry ogcGeom = GeometryUtils.geometryFromEsriShape(geometryref);
+            OGCGeometry ogcGeom = GeometryUtils.geometryFromEsriShape(geom);
             if (ogcGeom == null) {
                 return null;
             }

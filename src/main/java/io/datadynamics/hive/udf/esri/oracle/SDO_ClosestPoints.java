@@ -123,19 +123,19 @@ public class SDO_ClosestPoints extends ST_GeometryAccessor {
     /**
      * 두 개의 ESRI Shape 형식의 기하학 데이터를 입력받아 최단 거리를 형성하는 두 점을 잇는 LineString을 반환합니다.
      *
-     * @param geometryref1 첫 번째 기하학 데이터 (BytesWritable)
-     * @param geometryref2 두 번째 기하학 데이터 (BytesWritable)
+     * @param geom1 첫 번째 기하학 데이터 (BytesWritable)
+     * @param geom2 두 번째 기하학 데이터 (BytesWritable)
      * @return 최단 거리 점 쌍을 잇는 LineString을 포함하는 BytesWritable. 오류 발생 시 null 반환.
      */
-    public BytesWritable evaluate(BytesWritable geometryref1, BytesWritable geometryref2) {
+    public BytesWritable evaluate(BytesWritable geom1, BytesWritable geom2) {
         // 입력 데이터 유효성 검사: null 이거나 길이가 0인 경우 처리
-        if (geometryref1 == null || geometryref2 == null || geometryref1.getLength() == 0 || geometryref2.getLength() == 0) {
+        if (geom1 == null || geom2 == null || geom1.getLength() == 0 || geom2.getLength() == 0) {
             return null;
         }
 
         // ESRI Shape 바이너리 데이터를 OGCGeometry 객체로 변환
-        OGCGeometry ogcGeom1 = GeometryUtils.geometryFromEsriShape(geometryref1);
-        OGCGeometry ogcGeom2 = GeometryUtils.geometryFromEsriShape(geometryref2);
+        OGCGeometry ogcGeom1 = GeometryUtils.geometryFromEsriShape(geom1);
+        OGCGeometry ogcGeom2 = GeometryUtils.geometryFromEsriShape(geom2);
         if (ogcGeom1 == null || ogcGeom2 == null) {
             return null;
         }

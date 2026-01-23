@@ -29,16 +29,16 @@ public class SDO_ConcaveHull extends ST_GeometryAccessor {
      * 입력 기하 구조의 Concave Hull을 계산합니다.
      * ESRI API 제약으로 인해 현재는 Convex Hull을 반환합니다.
      *
-     * @param geometryref1 ESRI Shape 형식의 기하 데이터 (BytesWritable)
-     * @param tolerance    오목함 정도를 조절하는 파라미터 (현재 구현에서는 무시됨)
+     * @param geom      ESRI Shape 형식의 기하 데이터 (BytesWritable)
+     * @param tolerance 오목함 정도를 조절하는 파라미터 (현재 구현에서는 무시됨)
      * @return 계산된 Hull (Polygon)을 포함하는 BytesWritable. 오류 시 null.
      */
-    public BytesWritable evaluate(BytesWritable geometryref1, Double tolerance) {
-        if (geometryref1 == null || geometryref1.getLength() == 0) {
+    public BytesWritable evaluate(BytesWritable geom, Double tolerance) {
+        if (geom == null || geom.getLength() == 0) {
             return null;
         }
 
-        OGCGeometry ogcGeom = GeometryUtils.geometryFromEsriShape(geometryref1);
+        OGCGeometry ogcGeom = GeometryUtils.geometryFromEsriShape(geom);
         if (ogcGeom == null) {
             return null;
         }
@@ -60,7 +60,7 @@ public class SDO_ConcaveHull extends ST_GeometryAccessor {
     /**
      * 파라미터가 1개인 경우의 evaluate 메서드 (tolerance가 생략된 경우)
      */
-    public BytesWritable evaluate(BytesWritable geometryref1) {
-        return evaluate(geometryref1, null);
+    public BytesWritable evaluate(BytesWritable geom) {
+        return evaluate(geom, null);
     }
 }
