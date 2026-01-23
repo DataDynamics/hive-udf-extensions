@@ -7,7 +7,7 @@
 
 ## Cloudera CDP for GeoSpatial
 
-Cloudera CDP의 Impala에서 GeoSpatial 기능을 활성화 하기 위해서 Coordinator, Executor의 starup flag 설정에 `--GEOSPATIAL_LIBRARY=HIVE_ESRI`을 추가하도록 합니다.
+Cloudera CDP의 Impala에서 GeoSpatial 기능을 활성화 하기 위해서 Coordinator, Executor의 startup flag 설정에 `--geospatial_library=HIVE_ESRI`을 추가하도록 합니다.
 
 Cloudera CDP의 GeoSpatial 지원은 https://impala.apache.org/docs/build/html/topics/impala_geospatial_functions.html 을 참고하십시오.
 
@@ -121,6 +121,17 @@ CREATE TEMPORARY MACRO try_date(s STRING)
 ``````
 
 # Impala GeoSpatial Functions for Oracle GeoSpatial Functions
+
+* Cloudera Impala 에서는 Cloudera Manager 의 Impala 에서 다음 설정을 추가합니다.
+  * CM > Impala
+    * 구성 > Impala Daemon 명령줄 인수 고급 구성 스니펫(안전 밸브)
+    * Configuration > Impala Daemon Command Line Argument Advanced Configuration Snippet (Safety Valve)
+      * `--geospatial_library=HIVE_ESRI`
+      * [impala 공식문서](https://impala.apache.org/docs/build/html/topics/impala_geospatial_functions.html) 에는 `GEOSPATIAL_LIBRARY` 를 `HIVE_ESRI` 로 설정하라고 하지만, 소문자로 지정해야 합니다.
+* Apache Impala 에서는 impala coordinator 와 impala executor 의 startup flag 에 다음 설정을 추가합니다.
+  * `--geospatial_library=HIVE_ESRI`
+
+더 이전 버전을 사용하는 경우 아래와 같이 수동으로 udf 를 추가합니다.
 
 spatial function 을 hive 에 등록하기 위해 아래 esri repository 에서 hive udf 가 들어있는 jar file 을 download 한 후에 udf 를 추가합니다.
 
