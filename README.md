@@ -181,6 +181,44 @@ Fetched 1 row(s) in 0.12s
 
 ## Oracle to Impala Mapping
 
+```sql
+create schema poc;
+
+DROP FUNCTION IF EXISTS poc.SDO_Append(BINARY, BINARY);
+DROP FUNCTION IF EXISTS poc.SDO_ClosestPoints(BINARY, BINARY);
+DROP FUNCTION IF EXISTS poc.SDO_ConcaveHull(BINARY);
+DROP FUNCTION IF EXISTS poc.SDO_ConcaveHull(BINARY, DOUBLE);
+DROP FUNCTION IF EXISTS poc.SDO_ConvertToStdGeom(BINARY);
+DROP FUNCTION IF EXISTS poc.SDO_Extract(BINARY, INT);
+DROP FUNCTION IF EXISTS poc.SDO_Extract(BINARY, INT, INT);
+DROP FUNCTION IF EXISTS poc.SDO_GetVertices(BINARY);
+DROP FUNCTION IF EXISTS poc.SDO_MaxMbrOrdinate(BINARY, INT);
+DROP FUNCTION IF EXISTS poc.SDO_RectifyGeometry(BINARY);
+DROP FUNCTION IF EXISTS poc.SDO_RectifyGeometry(BINARY, DOUBLE);
+DROP FUNCTION IF EXISTS poc.SDO_Simplify(BINARY);
+DROP FUNCTION IF EXISTS poc.SDO_Simplify(BINARY, DOUBLE);
+DROP FUNCTION IF EXISTS poc.SDO_SplitGeomSegment(BINARY, DOUBLE);
+DROP FUNCTION IF EXISTS poc.SDO_Transform(BINARY, STRING, STRING);
+DROP FUNCTION IF EXISTS poc.SDO_ValidateGeometryWithContext(BINARY, STRING, STRING);
+
+CREATE FUNCTION poc.SDO_Append(BINARY, BINARY)              RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Append';
+CREATE FUNCTION poc.SDO_ClosestPoints(BINARY, BINARY)       RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_ClosestPoints';
+CREATE FUNCTION poc.SDO_ConcaveHull(BINARY)                 RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_ConcaveHull';
+CREATE FUNCTION poc.SDO_ConcaveHull(BINARY, DOUBLE)         RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_ConcaveHull';
+CREATE FUNCTION poc.SDO_ConvertToStdGeom(BINARY)            RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_ConvertToStdGeom';
+CREATE FUNCTION poc.SDO_Extract(BINARY, INT)                RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Extract';
+CREATE FUNCTION poc.SDO_Extract(BINARY, INT, INT)           RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Extract';
+CREATE FUNCTION poc.SDO_GetVertices(BINARY)                 RETURNS STRING LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_GetVertices';
+CREATE FUNCTION poc.SDO_MaxMbrOrdinate(BINARY, INT)         RETURNS DOUBLE LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_MaxMbrOrdinate';
+CREATE FUNCTION poc.SDO_RectifyGeometry(BINARY)             RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_RectifyGeometry';
+CREATE FUNCTION poc.SDO_RectifyGeometry(BINARY, DOUBLE)     RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_RectifyGeometry';
+CREATE FUNCTION poc.SDO_Simplify(BINARY)                    RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Simplify';
+CREATE FUNCTION poc.SDO_Simplify(BINARY, DOUBLE)            RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Simplify';
+CREATE FUNCTION poc.SDO_SplitGeomSegment(BINARY, DOUBLE)    RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_SplitGeomSegment';
+CREATE FUNCTION poc.SDO_Transform(BINARY, STRING, STRING)   RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Transform';
+CREATE FUNCTION poc.SDO_ValidateGeometryWithContext(BINARY) RETURNS STRING LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_ValidateGeometryWithContext';
+```
+
 ### 1:1 대응 또는 유사한 표준 함수
 
 Impala에서 제공하는 ST_ 계열 함수로 대체 가능합니다.
