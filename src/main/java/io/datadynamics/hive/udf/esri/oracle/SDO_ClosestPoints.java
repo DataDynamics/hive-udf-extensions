@@ -1,19 +1,13 @@
 package io.datadynamics.hive.udf.esri.oracle;
 
+import com.esri.core.geometry.Point;
+import com.esri.core.geometry.Polyline;
 import com.esri.core.geometry.ogc.OGCGeometry;
 import io.datadynamics.hive.udf.esri.hive.GeometryUtils;
 import io.datadynamics.hive.udf.esri.hive.ST_GeometryAccessor;
 import org.apache.hadoop.io.BytesWritable;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.io.WKBReader;
-import org.locationtech.jts.io.WKBWriter;
-import org.locationtech.jts.operation.distance.DistanceOp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
 
 /**
  * Hive UDF로서 두 Geometry 객체 간의 최단 거리를 형성하는 두 점을 찾아 반환하는 함수입니다.
@@ -49,9 +43,9 @@ import java.nio.ByteBuffer;
  * <p>이 LineString의 길이가 곧 두 Geometry 간의 최단 거리입니다.</p>
  *
  * <h2>알고리즘</h2>
- * <p>JTS 라이브러리의 {@link DistanceOp}를 사용하여 최단 거리 점 쌍을 계산합니다.
+ * <p>ESRI Geometry API를 사용하여 최단 거리 점 쌍을 계산합니다.
  * 이 알고리즘은 두 Geometry의 모든 정점과 선분을 고려하여 최단 거리를 형성하는
- * 두 점을 찾습니다. 계산 복잡도는 O(n*m)이며, n과 m은 각 Geometry의 정점 수입니다.</p>
+ * 두 점을 찾습니다.</p>
  *
  * <h2>지원 Geometry 타입 조합</h2>
  * <table border="1">
@@ -112,9 +106,6 @@ import java.nio.ByteBuffer;
  *
  * @author Data Dynamics
  * @version 1.0
- * @see DistanceOp JTS 거리 연산 클래스
- * @see DistanceOp#nearestPoints(Geometry, Geometry) 최단 거리 점 계산
- * @see GeometryFactory LineString 생성에 사용
  */
 public class SDO_ClosestPoints extends ST_GeometryAccessor {
 
@@ -141,45 +132,34 @@ public class SDO_ClosestPoints extends ST_GeometryAccessor {
         }
 
         try {
-            // OGCGeometry (ESRI) -> WKB -> JTS Geometry 변환
-            // JTS의 DistanceOp를 사용하기 위해 JTS 객체로 변환이 필요함
-            WKBReader reader = new WKBReader();
+            // ESRI Geometry API를 사용하여 최단 거리 점 쌍 계산
+            com.esri.core.geometry.Geometry esriGeom1 = ogcGeom1.getEsriGeometry();
+            com.esri.core.geometry.Geometry esriGeom2 = ogcGeom2.getEsriGeometry();
 
-            // 첫 번째 지오메트리 변환
-            ByteBuffer wkb1 = ogcGeom1.asBinary();
-            byte[] bytes1 = new byte[wkb1.remaining()];
-            wkb1.get(bytes1);
-            Geometry jtsGeom1 = reader.read(bytes1);
+            // Envelope2D를 사용하여 중심점 계산
+            com.esri.core.geometry.Envelope2D env2 = new com.esri.core.geometry.Envelope2D();
+            esriGeom2.queryEnvelope2D(env2);
+            com.esri.core.geometry.Point center2 = new com.esri.core.geometry.Point(env2.getCenterX(), env2.getCenterY());
 
-            // 두 번째 지오메트리 변환
-            ByteBuffer wkb2 = ogcGeom2.asBinary();
-            byte[] bytes2 = new byte[wkb2.remaining()];
-            wkb2.get(bytes2);
-            Geometry jtsGeom2 = reader.read(bytes2);
+            com.esri.core.geometry.Proximity2DResult prox1 = com.esri.core.geometry.GeometryEngine.getNearestCoordinate(esriGeom1, center2, false);
+            com.esri.core.geometry.Proximity2DResult prox2 = com.esri.core.geometry.GeometryEngine.getNearestCoordinate(esriGeom2, prox1.getCoordinate(), false);
+            com.esri.core.geometry.Proximity2DResult prox1_final = com.esri.core.geometry.GeometryEngine.getNearestCoordinate(esriGeom1, prox2.getCoordinate(), false);
 
-            // JTS DistanceOp를 사용하여 최단 거리 점 쌍(nearest points pair) 계산
-            // nearestPoints[0]은 jtsGeom1 위의 점, nearestPoints[1]은 jtsGeom2 위의 점
-            Coordinate[] nearestPoints = DistanceOp.nearestPoints(jtsGeom1, jtsGeom2);
-            if (nearestPoints == null || nearestPoints.length < 2) {
-                return null;
-            }
+            Point p1 = prox1_final.getCoordinate();
+            Point p2 = prox2.getCoordinate();
 
             // 계산된 두 점을 잇는 LineString 생성
-            GeometryFactory factory = new GeometryFactory();
-            Geometry resultLine = factory.createLineString(nearestPoints);
+            Polyline resultLine = new Polyline();
+            resultLine.startPath(p1);
+            resultLine.lineTo(p2);
 
-            // JTS Geometry -> WKB -> OGCGeometry -> ESRI Shape 순으로 다시 변환하여 반환
-            WKBWriter writer = new WKBWriter();
-            byte[] resultWkb = writer.write(resultLine);
-            OGCGeometry ogcResult = OGCGeometry.fromBinary(ByteBuffer.wrap(resultWkb));
-
-            // 원본의 공간 참조(SRID)를 결과에 설정
-            ogcResult.setSpatialReference(ogcGeom1.esriSR);
+            // ESRI Polyline -> OGCGeometry
+            OGCGeometry ogcResult = OGCGeometry.createFromEsriGeometry(resultLine, ogcGeom1.esriSR);
 
             // 최종 OGC 객체를 다시 Hive에서 사용할 수 있는 ESRI Shape 바이너리(BytesWritable)로 변환하여 반환
             return GeometryUtils.geometryToEsriShapeBytesWritable(ogcResult);
         } catch (Exception e) {
-            // 변환 또는 계산 중 오류 발생 시 로그를 남기고 null 반환
+            // 계산 중 오류 발생 시 로그를 남기고 null 반환
             LOG.error("Error in SDO_ClosestPoints: " + e.getMessage(), e);
             return null;
         }
