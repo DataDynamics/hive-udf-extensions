@@ -191,6 +191,7 @@ DROP FUNCTION IF EXISTS poc.SDO_ConcaveHull(BINARY, DOUBLE);
 DROP FUNCTION IF EXISTS poc.SDO_ConvertToStdGeom(BINARY);
 DROP FUNCTION IF EXISTS poc.SDO_Extract(BINARY, INT);
 DROP FUNCTION IF EXISTS poc.SDO_Extract(BINARY, INT, INT);
+DROP FUNCTION IF EXISTS poc.SDO_Geometry(DOUBLE, DOUBLE, BINARY, ARRAY<DOUBLE>, ARRAY<DOUBLE>);
 DROP FUNCTION IF EXISTS poc.SDO_GetVertices(BINARY);
 DROP FUNCTION IF EXISTS poc.SDO_MaxMbrOrdinate(BINARY, INT);
 DROP FUNCTION IF EXISTS poc.SDO_RectifyGeometry(BINARY);
@@ -206,6 +207,7 @@ CREATE FUNCTION poc.SDO_ClosestPoints(BINARY, BINARY)       RETURNS BINARY LOCAT
 CREATE FUNCTION poc.SDO_ConcaveHull(BINARY)                 RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_ConcaveHull';
 CREATE FUNCTION poc.SDO_ConvertToStdGeom(BINARY)            RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_ConvertToStdGeom';
 CREATE FUNCTION poc.SDO_Extract(BINARY, INT)                RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Extract';
+CREATE FUNCTION poc.SDO_Geometry(DOUBLE, DOUBLE, BINARY, ARRAY<DOUBLE>, ARRAY<DOUBLE>) RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Geometry';
 CREATE FUNCTION poc.SDO_GetVertices(BINARY)                 RETURNS STRING LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_GetVertices';
 CREATE FUNCTION poc.SDO_MaxMbrOrdinate(BINARY, INT)         RETURNS DOUBLE LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_MaxMbrOrdinate';
 CREATE FUNCTION poc.SDO_RectifyGeometry(BINARY)             RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_RectifyGeometry';
