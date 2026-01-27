@@ -49,17 +49,15 @@ public class SDO_Transform extends ST_GeometryAccessor {
                 String[] sourceSplit = sourceCrsCode.split(":");
                 if (sourceSplit.length > 1) {
                     sourceSrid = Integer.parseInt(sourceSplit[1]);
-                    if (sourceSrid == 4326) {
-                        System.setProperty("org.geotools.referencing.forceXY", "true");// 좌표계 변환시 xy 가 뒤집혀야 함
-                    }
                 }
 
                 String[] split = targetCrsCode.split(":");
                 if (split.length > 1) {
                     targetSrid = Integer.parseInt(split[1]);
-                    if (targetSrid == 4326) {
-                        System.setProperty("org.geotools.referencing.forceXY", "true");// 좌표계 변환시 xy 가 뒤집혀야 함
-                    }
+                }
+
+                if (sourceSrid == 4326 || targetSrid == 4326) {
+                    System.setProperty("org.geotools.referencing.forceXY", "true");// 좌표계 변환시 xy 가 뒤집혀야 함
                 }
             } catch (Exception ignore) {
             }
