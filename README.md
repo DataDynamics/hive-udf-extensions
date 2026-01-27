@@ -209,7 +209,7 @@ CREATE FUNCTION poc.SDO_ConvertToStdGeom(BINARY)            RETURNS BINARY LOCAT
 CREATE FUNCTION poc.SDO_Extract(BINARY, INT)                RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Extract';
 CREATE FUNCTION poc.SDO_GetVertices(BINARY)                 RETURNS STRING LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_GetVertices';
 CREATE FUNCTION poc.SDO_MaxMbrOrdinate(BINARY, INT)         RETURNS DOUBLE LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_MaxMbrOrdinate';
-CREATE FUNCTION poc.SDO_MinMbrOrdinate(BINARY, INT)         RETURNS DOUBLE LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_MaxMbrOrdinate';
+CREATE FUNCTION poc.SDO_MinMbrOrdinate(BINARY, INT)         RETURNS DOUBLE LOCATION '/jars/hive-udf-extensions-1.2.2.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_MinMbrOrdinate';
 CREATE FUNCTION poc.SDO_RectifyGeometry(BINARY)             RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_RectifyGeometry';
 CREATE FUNCTION poc.SDO_RectifyGeometry(BINARY, DOUBLE)     RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_RectifyGeometry';
 CREATE FUNCTION poc.SDO_Simplify(BINARY, DOUBLE)            RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Simplify';

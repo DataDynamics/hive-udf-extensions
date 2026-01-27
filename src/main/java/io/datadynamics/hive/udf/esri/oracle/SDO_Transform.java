@@ -39,6 +39,31 @@ public class SDO_Transform extends ST_GeometryAccessor {
                 return null;
             }
 
+            // 4. 변환된 Geometry를 OGCGeometry로 변환 및 SRID 설정
+//            System.setProperty("org.geotools.referencing.forceXY", "false");
+//            System.clearProperty("org.geotools.referencing.forceXY");
+//            System.out.println("forceXY = " + System.getProperty("org.geotools.referencing.forceXY"));
+            int sourceSrid = 0;
+            int targetSrid = 0;
+            try {
+                String[] sourceSplit = sourceCrsCode.split(":");
+                if (sourceSplit.length > 1) {
+                    sourceSrid = Integer.parseInt(sourceSplit[1]);
+                    if (sourceSrid == 4326) {
+                        System.setProperty("org.geotools.referencing.forceXY", "true");// 좌표계 변환시 xy 가 뒤집혀야 함
+                    }
+                }
+
+                String[] split = targetCrsCode.split(":");
+                if (split.length > 1) {
+                    targetSrid = Integer.parseInt(split[1]);
+                    if (targetSrid == 4326) {
+                        System.setProperty("org.geotools.referencing.forceXY", "true");// 좌표계 변환시 xy 가 뒤집혀야 함
+                    }
+                }
+            } catch (Exception ignore) {
+            }
+
             // 2. GeoTools를 이용한 좌표계 변환 객체 생성
             CoordinateReferenceSystem sourceCRS = CRS.decode(sourceCrsCode);
             CoordinateReferenceSystem targetCRS = CRS.decode(targetCrsCode);
@@ -51,17 +76,7 @@ public class SDO_Transform extends ST_GeometryAccessor {
             com.esri.core.geometry.Geometry esriGeom = ogcGeom.getEsriGeometry();
             com.esri.core.geometry.Geometry transformedEsriGeom = transformEsriGeometry(esriGeom, transform);
 
-            // 4. 변환된 Geometry를 OGCGeometry로 변환 및 SRID 설정
-            int srid = 0;
-            try {
-                String[] split = targetCrsCode.split(":");
-                if (split.length > 1) {
-                    srid = Integer.parseInt(split[1]);
-                }
-            } catch (Exception ignore) {
-            }
-
-            com.esri.core.geometry.SpatialReference targetSR = srid != 0 ? com.esri.core.geometry.SpatialReference.create(srid) : null;
+            com.esri.core.geometry.SpatialReference targetSR = targetSrid != 0 ? com.esri.core.geometry.SpatialReference.create(targetSrid) : null;
             com.esri.core.geometry.ogc.OGCGeometry ogcResult = com.esri.core.geometry.ogc.OGCGeometry.createFromEsriGeometry(transformedEsriGeom, targetSR);
 
             return GeometryUtils.geometryToEsriShapeBytesWritable(ogcResult);
