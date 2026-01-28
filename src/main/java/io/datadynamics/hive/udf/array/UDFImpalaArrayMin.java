@@ -20,7 +20,6 @@ import static org.apache.hadoop.hive.serde.serdeConstants.STRING_TYPE_NAME;
         , value = "_FUNC_(string) - returns the minimum value of input(json array)."
         , extended = "Example:\n > select _FUNC_(string) from src;")
 public class UDFImpalaArrayMin extends GenericUDF {
-    private static final int INITIAL_SIZE = 128;
     private static final int ARG_COUNT = 1; // Number of arguments to this UDF
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Text TEXT_NULL = new Text("null");
