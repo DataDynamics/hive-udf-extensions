@@ -216,6 +216,12 @@ CREATE FUNCTION poc.SDO_Simplify(BINARY, DOUBLE)            RETURNS BINARY LOCAT
 CREATE FUNCTION poc.SDO_SplitGeomSegment(BINARY, DOUBLE)    RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_SplitGeomSegment';
 CREATE FUNCTION poc.SDO_Transform(BINARY, STRING, STRING)   RETURNS BINARY LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_Transform';
 CREATE FUNCTION poc.SDO_ValidateGeometryWithContext(BINARY) RETURNS STRING LOCATION '/jars/hive-udf-extensions-1.0.0.jar' SYMBOL='io.datadynamics.hive.udf.esri.oracle.SDO_ValidateGeometryWithContext';
+
+DROP FUNCTION IF EXISTS poc.array_max(STRING);
+DROP FUNCTION IF EXISTS poc.array_min(STRING);
+
+CREATE FUNCTION poc.array_max(STRING) RETURNS STRING LOCATION '/jars/hive-udf-extensions-1.4.0.jar' SYMBOL='io.datadynamics.hive.udf.array.UDFImpalaArrayMax';
+CREATE FUNCTION poc.array_min(STRING) RETURNS STRING LOCATION '/jars/hive-udf-extensions-1.4.0.jar' SYMBOL='io.datadynamics.hive.udf.array.UDFImpalaArrayMin';
 ```
 
 ### 1:1 대응 또는 유사한 표준 함수
